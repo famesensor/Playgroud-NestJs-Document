@@ -5,29 +5,22 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 
-export class Student extends BaseEntity {
+export class StudentInfo extends BaseEntity {
   @PrimaryGeneratedColumn()
-  student_id: number;
+  info_id: number;
 
   @Column()
-  teacher_id: number;
-
-  @Column()
-  username: string;
-
-  @Column()
-  password: string;
-
-  @Column()
-  title: string;
+  user_id: number;
 
   @Column()
   name: string;
 
   @Column()
   student_code: string;
+
+  @Column()
+  semeter: string;
 
   @Column()
   academic_year: string;
@@ -56,23 +49,9 @@ export class Student extends BaseEntity {
   @Column()
   phone: string;
 
-  @Column()
-  email: string;
-
-  @Column()
-  signature: string;
-
-  @Column()
-  salt: string;
-
   @CreateDateColumn({ type: 'timestamp' })
   create_date: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
   update_date: Date;
-
-  async validatePassword(password: string): Promise<boolean> {
-    const hash = await bcrypt.hash(password, this.salt);
-    return hash === this.password;
-  }
 }
