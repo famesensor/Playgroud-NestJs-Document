@@ -2,10 +2,14 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  Entity,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
+@Entity()
+@Unique(['student_code', 'phone'])
 export class StudentInfo extends BaseEntity {
   @PrimaryGeneratedColumn()
   info_id: number;
