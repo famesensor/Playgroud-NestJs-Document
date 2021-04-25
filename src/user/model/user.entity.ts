@@ -1,19 +1,23 @@
 import {
   BaseEntity,
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
+  JoinColumn,
+  OneToOne,
+  PrimaryColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { StudentInfo } from './student.entity';
 
 @Entity()
-@Unique(['email', 'username'])
+@Unique(['username', 'email'])
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  user_id: number;
+  @PrimaryColumn()
+  id: string;
 
   @Column()
   username: string;
@@ -38,6 +42,11 @@ export class User extends BaseEntity {
 
   @Column()
   salt: string;
+
+  @OneToOne(() => StudentInfo, (studentInfo) => studentInfo.user, {
+    cascade: true,
+  })
+  studentInfo: StudentInfo;
 
   @CreateDateColumn({ type: 'timestamp' })
   create_date: Date;
