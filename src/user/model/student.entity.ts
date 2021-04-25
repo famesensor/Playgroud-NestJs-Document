@@ -3,22 +3,19 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
+  JoinColumn,
+  OneToOne,
+  PrimaryColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity()
 @Unique(['student_code', 'phone'])
 export class StudentInfo extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  info_id: number;
-
-  @Column()
-  user_id: number;
-
-  @Column()
-  name: string;
+  @PrimaryColumn()
+  id: string;
 
   @Column()
   student_code: string;
@@ -47,11 +44,15 @@ export class StudentInfo extends BaseEntity {
   @Column()
   status: string;
 
-  @Column()
+  @Column({ type: 'float8' })
   gpax: number;
 
   @Column()
   phone: string;
+
+  @OneToOne(() => User, (user) => user.studentInfo)
+  @JoinColumn()
+  user: User;
 
   @CreateDateColumn({ type: 'timestamp' })
   create_date: Date;
