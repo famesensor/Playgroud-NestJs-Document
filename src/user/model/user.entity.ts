@@ -1,10 +1,9 @@
 import {
   BaseEntity,
-  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
   Unique,
@@ -12,6 +11,7 @@ import {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { StudentInfo } from './student.entity';
+import { AdvicerAdvisee } from './advicer.entity';
 
 @Entity()
 @Unique(['username', 'email'])
@@ -47,6 +47,24 @@ export class User extends BaseEntity {
     cascade: true,
   })
   studentInfo: StudentInfo;
+
+  @OneToMany(
+    () => AdvicerAdvisee,
+    (advicerAdvisee) => advicerAdvisee.advicer_id,
+    {
+      cascade: true,
+    },
+  )
+  advicer: AdvicerAdvisee[];
+
+  @OneToOne(
+    () => AdvicerAdvisee,
+    (advicerAdvisee) => advicerAdvisee.advisee_id,
+    {
+      cascade: true,
+    },
+  )
+  advisee: StudentInfo;
 
   @CreateDateColumn({ type: 'timestamp' })
   create_date: Date;
