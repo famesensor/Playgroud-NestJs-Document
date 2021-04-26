@@ -23,7 +23,11 @@ export class UserService {
       .createQueryBuilder('user')
       .where(`user.id = :id`, { id: id })
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-      .getMany();
+      .leftJoinAndSelect('user.advisee', 'advisee')
+      .leftJoinAndSelect('advisee.advicer', 'advicer')
+      // .leftJoinAndSelect('user.advicer', 'advicer')
+      // .leftJoinAndSelect('advicer.advisee', 'advisee')
+      .getOne();
 
     return data;
   }
