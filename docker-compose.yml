@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  psql:
+    image: postgres
+    container_name: psql
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: documentor
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: test@mail.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - '8080:80'
+    links:
+      - psql
+    depends_on:
+      - psql
+    volumes:
+      - datastore_sqldb-admin_data:/var/lib/pgadmin
+
+volumes:
+  datastore_sqldb-admin_data:
