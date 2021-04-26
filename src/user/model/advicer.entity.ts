@@ -17,11 +17,11 @@ export class AdvicerAdvisee extends BaseEntity {
 
   @ManyToOne(() => User, (user) => user.advicer)
   @JoinColumn()
-  advicer_id: User;
+  advicer: User;
 
-  @OneToOne(() => User, (user) => user)
+  @OneToOne(() => User, (user) => user.advisee)
   @JoinColumn()
-  advisee_id: User;
+  advisee: User;
 
   @CreateDateColumn({ type: 'timestamp' })
   create_date: Date;

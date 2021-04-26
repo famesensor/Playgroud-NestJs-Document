@@ -48,22 +48,10 @@ export class User extends BaseEntity {
   })
   studentInfo: StudentInfo;
 
-  @OneToMany(
-    () => AdvicerAdvisee,
-    (advicerAdvisee) => advicerAdvisee.advicer_id,
-    {
-      cascade: true,
-    },
-  )
+  @OneToMany(() => AdvicerAdvisee, (advicerAdvisee) => advicerAdvisee.advicer)
   advicer: AdvicerAdvisee[];
 
-  @OneToOne(
-    () => AdvicerAdvisee,
-    (advicerAdvisee) => advicerAdvisee.advisee_id,
-    {
-      cascade: true,
-    },
-  )
+  @OneToOne(() => AdvicerAdvisee, (advicerAdvisee) => advicerAdvisee.advisee)
   advisee: StudentInfo;
 
   @CreateDateColumn({ type: 'timestamp' })
