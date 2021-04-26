@@ -67,8 +67,8 @@ export class UserRepository extends Repository<User> {
 
     const advicer = await this.findOne({ username: 'teacher_test1' });
 
-    advier.advisee_id = user;
-    advier.advicer_id = advicer;
+    advier.advisee = user;
+    advier.advicer = advicer;
 
     try {
       await user.save();
