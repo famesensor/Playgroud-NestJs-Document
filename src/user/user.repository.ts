@@ -10,6 +10,7 @@ import {
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { AdvicerAdvisee } from './model/advicer.entity';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
@@ -34,6 +35,7 @@ export class UserRepository extends Repository<User> {
 
     const user = new User();
     const studentInfo = new StudentInfo();
+    const advier = new AdvicerAdvisee();
 
     user.id = UserUUID + uuidv4();
     user.username = username;
@@ -63,11 +65,14 @@ export class UserRepository extends Repository<User> {
 
     user.studentInfo = studentInfo;
 
-    // TODO: craete relation between user and teacher.
+    const advicer = await this.findOne({ username: 'teacher_test1' });
+
+    advier.advisee_id = user;
+    advier.advicer_id = advicer;
 
     try {
       await user.save();
-
+      await advier.save();
       return { success: true };
     } catch (error) {
       if (error.code === '23505') {
