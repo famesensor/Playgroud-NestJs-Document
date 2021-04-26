@@ -1,22 +1,27 @@
 import {
   BaseEntity,
-  Column,
   CreateDateColumn,
   Entity,
-  PrimaryColumn,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity()
 export class AdvicerAdvisee extends BaseEntity {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: string;
 
-  @Column()
-  advicer_id: string;
+  @ManyToOne(() => User, (user) => user.advicer)
+  @JoinColumn()
+  advicer_id: User;
 
-  @Column()
-  advisee_id: string;
+  @OneToOne(() => User, (user) => user)
+  @JoinColumn()
+  advisee_id: User;
 
   @CreateDateColumn({ type: 'timestamp' })
   create_date: Date;
