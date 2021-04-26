@@ -9,6 +9,9 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { GetUser } from 'src/shared/decorators/get-user.decorator';
+import { Role } from 'src/shared/enums/role.enum';
+import { RolesGuard } from 'src/shared/guards/role/role.guard';
+import { Roles } from 'src/shared/guards/role/roles.decorator';
 import { StudentDto } from './dto/create-student.dto';
 import { TeacherDto } from './dto/create-teacher.dto';
 import { SignCredentialsDto } from './dto/sign-credentials.dto';
@@ -43,7 +46,8 @@ export class UserController {
 
   // this func is check UseGuards
   @Get('/me')
-  @UseGuards(AuthGuard())
+  @Roles(Role.Student)
+  @UseGuards(AuthGuard(), RolesGuard)
   getUser(@GetUser() user: User): Promise<any> {
     return this.userService.getStudentProfile(user.id);
   }
