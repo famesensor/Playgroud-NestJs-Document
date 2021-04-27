@@ -6,7 +6,7 @@ import { UserRepository } from 'src/user/user.repository';
 import * as config from 'config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload } from './jwt.payload';
-import { User } from 'src/user/model/user.entity';
+import { User } from 'src/user/entity/user.entity';
 
 const jwtConfig = config.get('jwt');
 
