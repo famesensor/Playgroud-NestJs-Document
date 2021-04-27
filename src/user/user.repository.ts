@@ -1,8 +1,8 @@
 import { EntityRepository, Repository } from 'typeorm';
 import { StudentDto, StudentUUID, UserUUID } from './dto/create-student.dto';
 import { SignCredentialsDto } from './dto/sign-credentials.dto';
-import { StudentInfo } from './model/student.entity';
-import { User } from './model/user.entity';
+import { StudentInfo } from './entity/student.entity';
+import { User } from './entity/user.entity';
 import { TeacherDto } from './dto/create-teacher.dto';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
@@ -10,7 +10,7 @@ import {
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { AdvicerAdvisee } from './model/advicer.entity';
+import { AdvicerAdvisee } from './entity/advicer.entity';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {

@@ -15,7 +15,7 @@ import { Roles } from 'src/shared/guards/role/roles.decorator';
 import { StudentDto } from './dto/create-student.dto';
 import { TeacherDto } from './dto/create-teacher.dto';
 import { SignCredentialsDto } from './dto/sign-credentials.dto';
-import { User } from './model/user.entity';
+import { User } from './entity/user.entity';
 import { UserService } from './user.service';
 
 @Controller('user')
