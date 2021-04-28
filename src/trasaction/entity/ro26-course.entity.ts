@@ -29,6 +29,9 @@ export class RO26Course extends BaseEntity {
   credit: number;
 
   @Column()
+  type: string;
+
+  @Column()
   createBy: string;
 
   @CreateDateColumn({ type: 'timestamp' })
