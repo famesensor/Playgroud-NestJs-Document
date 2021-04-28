@@ -18,11 +18,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
+    console.log(exception.getResponse().valueOf());
+
     let message = '';
-    let errors;
     switch (status) {
       case 400:
-        message = exception.message;
+        message = exception.getResponse().valueOf()['message'];
         break;
       case 401:
         message = exception.message;
