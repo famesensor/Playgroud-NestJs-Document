@@ -1,6 +1,5 @@
 import { IsEmpty, IsString } from 'class-validator';
-
-export class ro01Dto {
+export class RO01Dto {
   @IsEmpty()
   @IsString()
   title: string;
