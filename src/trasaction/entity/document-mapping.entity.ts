@@ -11,6 +11,7 @@ import { DocumentRO16 } from './document-ro16.entity';
 import { DocumentRO26 } from './document-ro26.entity';
 import { DocumentRO01 } from './document-ro01.entity';
 
+export const PREFIX_MAPPING = `mapping_document_`;
 @Entity()
 export class MappingDocument extends BaseEntity {
   @PrimaryColumn()

@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+export const PREFIX_RO01 = 'document_ro01_';
 @Entity()
 export class DocumentRO01 extends BaseEntity {
   @PrimaryColumn()
