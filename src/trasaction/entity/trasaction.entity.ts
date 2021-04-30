@@ -6,23 +6,29 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Approve } from './appove.entity';
 import { DocumentType } from './document-type.entity';
 
+export const PREFIX_TRASACTION = `trasaction_document_`;
 @Entity()
-export class TrasactionDocument extends BaseEntity {
+export class TransactionDocument extends BaseEntity {
   @PrimaryColumn()
   id: string;
 
-  @ManyToOne(() => User, (user) => user.trasaction)
+  @ManyToOne(() => User, (user) => user.transaction)
   @JoinColumn()
   user: User;
 
-  @ManyToOne(() => DocumentType)
+  @ManyToOne(() => DocumentType, (docType) => docType.transaction)
   @JoinColumn()
   type: DocumentType;
+
+  @OneToMany(() => Approve, (approve) => approve.transaction)
+  approve: Approve[];
 
   @Column()
   credit: number;

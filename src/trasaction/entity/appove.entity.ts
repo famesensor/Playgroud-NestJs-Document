@@ -3,10 +3,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { TransactionDocument } from './trasaction.entity';
 
 @Entity()
 export class Approve extends BaseEntity {
@@ -28,7 +30,9 @@ export class Approve extends BaseEntity {
   @Column()
   exprieDate: number;
 
-  //   @ManyToOne(() => )
+  @ManyToOne(() => TransactionDocument)
+  @JoinColumn()
+  transaction: TransactionDocument;
 
   @CreateDateColumn({ type: 'timestamp' })
   create_date: Date;
