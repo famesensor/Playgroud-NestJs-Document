@@ -9,11 +9,13 @@ import * as bcrypt from 'bcrypt';
 import {
   ConflictException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { AdvicerAdvisee } from './entity/advicer.entity';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
+  // Mock function... delete
   async signInStudent(studentDto: StudentDto): Promise<any> {
     const {
       username,
@@ -110,6 +112,16 @@ export class UserRepository extends Repository<User> {
         throw new InternalServerErrorException();
       }
     }
+  }
+
+  async getUserDetail(id: string): Promise<any> {
+    const user = await this.findOne({ id: id }, { relations: ['studentInfo'] });
+
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return user;
   }
 
   async validateUserPassword(
