@@ -1,6 +1,6 @@
 import { IsEmpty, IsNumber, IsString } from 'class-validator';
 
-export class ro16Dto {
+export class RO16Dto {
   @IsEmpty()
   @IsString()
   to_name: string;

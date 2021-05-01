@@ -7,4 +7,8 @@ export class RO01Dto {
   @IsEmpty()
   @IsString()
   to_name: string;
+
+  @IsEmpty()
+  @IsString()
+  reason: string;
 }
