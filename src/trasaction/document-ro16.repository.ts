@@ -1,8 +1,9 @@
+import { InternalServerErrorException } from '@nestjs/common';
 import { User } from 'src/user/entity/user.entity';
 import { UUIDGen } from 'src/utils/uuid';
 import { EntityRepository, Repository } from 'typeorm';
 import { RO16Dto } from './dto/create-ro16.dto';
-import { Approve, PREFIX_APPROVE } from './entity/appove.entity';
+import { Approve, PREFIX_APPROVE } from './entity/approve.entity';
 import {
   MappingDocument,
   PREFIX_MAPPING,
@@ -73,7 +74,7 @@ export class RO16Repository extends Repository<DocumentRO16> {
       approve.step = index;
       approve.teacher_id = teacher.id;
       approve.transaction = trasaction;
-      approve.exprieDate = null;
+      // approve.exprieDate = null;
       approve.create_date = new Date();
       approve.update_date = new Date();
       approvies.push(approve);
@@ -87,7 +88,7 @@ export class RO16Repository extends Repository<DocumentRO16> {
       await trasaction.save();
     } catch (error) {
       console.log(error);
-      return error;
+      throw new InternalServerErrorException();
     }
 
     return null;
