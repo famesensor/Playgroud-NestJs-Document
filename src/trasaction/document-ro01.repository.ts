@@ -15,7 +15,7 @@ import {
   TransactionDocument,
 } from './entity/trasaction.entity';
 import { DocumentType } from './entity/document-type.entity';
-import { Approve, PREFIX_APPROVE } from './entity/appove.entity';
+import { Approve, PREFIX_APPROVE } from './entity/approve.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 
 // TODO: add trasaction for insert data
@@ -56,7 +56,7 @@ export class RO01Repository extends Repository<DocumentRO01> {
     map.create_date = new Date();
     map.update_date = new Date();
 
-    // approve...
+    // // approve...
     const approvies: Array<Approve> = [];
     let index = 1;
     for (const teacher of teachers) {
@@ -67,7 +67,7 @@ export class RO01Repository extends Repository<DocumentRO01> {
       approve.step = index;
       approve.teacher_id = teacher.id;
       approve.transaction = trasaction;
-      approve.exprieDate = new Date();
+      // approve.exprieDate = new Date();
       approve.create_date = new Date();
       approve.update_date = new Date();
       approvies.push(approve);
