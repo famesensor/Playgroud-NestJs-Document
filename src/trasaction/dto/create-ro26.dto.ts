@@ -1,36 +1,34 @@
 import { Type } from 'class-transformer';
 import {
-  IsEmpty,
+  IsNotEmpty,
   IsNumber,
   IsString,
-  MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
 
 export class RO26Dto {
   @Type(() => SubjectDto)
-  @MaxLength(8)
   @ValidateNested({ each: true })
   subject: Array<SubjectDto>;
 }
 
 export class SubjectDto {
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   course_code: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsNumber()
   @Min(1)
   group_number: number;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsNumber()
   @Min(1)
   credit: number;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   type: string;
 }

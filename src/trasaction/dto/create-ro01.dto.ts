@@ -1,14 +1,14 @@
-import { IsEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 export class RO01Dto {
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   title: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   to_name: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   reason: string;
 }

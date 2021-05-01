@@ -1,31 +1,31 @@
-import { IsEmpty, IsNumber, IsString } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class RO16Dto {
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   to_name: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   attach_one: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   attach_two: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   wish: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsNumber()
   time_period: number;
 
-  @IsEmpty()
-  @IsString()
+  @IsNotEmpty()
+  @IsDateString()
   start_date: string;
 
-  @IsEmpty()
-  @IsString()
+  @IsNotEmpty()
+  @IsDateString()
   end_date: string;
 }
