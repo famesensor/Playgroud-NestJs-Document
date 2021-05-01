@@ -11,7 +11,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Approve } from './appove.entity';
+import { Approve } from './approve.entity';
 import { MappingDocument } from './document-mapping.entity';
 import { DocumentType } from './document-type.entity';
 
