@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Role } from 'src/shared/enums/role.enum';
 import { SignCredentialsDto } from 'src/user/dto/sign-credentials.dto';
 import { UserRepository } from 'src/user/user.repository';
 import { JwtPayload } from './strategies/jwt.payload';
@@ -23,10 +24,13 @@ export class AuthenticationService {
       throw new UnauthorizedException('Invalid credentials!');
     }
 
+    let role = user.role;
+    if (role != Role.Student) role = 'teacher';
+
     const payload: JwtPayload = {
       user_id: user.id,
       username: user.username,
-      role: user.role,
+      role: role,
       email: user.email,
     };
 
