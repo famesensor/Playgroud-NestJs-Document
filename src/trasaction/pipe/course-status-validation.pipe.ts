@@ -25,6 +25,8 @@ export class CourseTypeValidationPipe implements PipeTransform {
           throw new BadRequestException(`${item.type} is am invalid type`);
         }
       });
+
+      return value;
     }
   }
 
