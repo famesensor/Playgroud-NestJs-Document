@@ -29,7 +29,7 @@ export class Approve extends BaseEntity {
   step: number;
 
   @Column({ type: 'timestamptz', nullable: true })
-  exprieDate: Date;
+  expireDate: Date;
 
   @ManyToOne(() => TransactionDocument, (trasaction) => trasaction.approve)
   @JoinColumn()
