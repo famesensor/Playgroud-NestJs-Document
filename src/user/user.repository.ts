@@ -114,8 +114,13 @@ export class UserRepository extends Repository<User> {
     }
   }
 
-  async getUserDetail(id: string): Promise<any> {
-    const user = await this.findOne({ id: id }, { relations: ['studentInfo'] });
+  async getUserDetail(id: string): Promise<User> {
+    const user = await this.createQueryBuilder('user')
+      .where(`user.id = :id`, { id: id })
+      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('user.advisee', 'advisee')
+      .leftJoinAndSelect('advisee.advicer', 'advicer')
+      .getOne();
 
     if (!user) {
       throw new NotFoundException();
