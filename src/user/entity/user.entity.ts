@@ -53,7 +53,7 @@ export class User extends BaseEntity {
   advicer: AdvicerAdvisee[];
 
   @OneToOne(() => AdvicerAdvisee, (advicerAdvisee) => advicerAdvisee.advisee)
-  advisee: StudentInfo;
+  advisee: AdvicerAdvisee;
 
   @OneToMany(() => TransactionDocument, (trasactionDoc) => trasactionDoc.user)
   transaction: TransactionDocument[];
