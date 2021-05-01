@@ -9,6 +9,9 @@ import { RO26Repository } from './document-ro26.repository';
 import { DocumentType } from './entity/document-type.entity';
 import { TrasactionController } from './trasaction.controller';
 import { TrasactionService } from './trasaction.service';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { mailConfig } from 'src/config/mailer.config';
+import { TransactionDocument } from './entity/trasaction.entity';
 
 @Module({
   imports: [
@@ -17,9 +20,11 @@ import { TrasactionService } from './trasaction.service';
       RO16Repository,
       RO26Repository,
       DocumentType,
+      TransactionDocument,
       UserRepository,
     ]),
     AuthenticationModule,
+    MailerModule.forRoot(mailConfig),
   ],
   providers: [TrasactionService, UserService],
   controllers: [TrasactionController],
