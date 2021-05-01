@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { DocumentRO26 } from './document-ro26.entity';
 
+export const PREFIX_COURSE = `ro26_course_`;
 @Entity()
 export class RO26Course extends BaseEntity {
   @PrimaryColumn()
