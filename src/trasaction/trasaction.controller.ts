@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/shared/decorators/get-user.decorator';
 import { Role } from 'src/shared/enums/role.enum';
@@ -10,6 +10,7 @@ import { RO16Dto } from './dto/create-ro16.dto';
 import { RO26Dto } from './dto/create-ro26.dto';
 import { TrasactionService } from './trasaction.service';
 import { CourseTypeValidationPipe } from './pipe/course-status-validation.pipe';
+import { PaginationDto } from 'src/shared/dto/pagination/pagination.dto';
 
 @Controller('trasaction')
 @UseGuards(AuthGuard(), RolesGuard)
@@ -35,5 +36,14 @@ export class TrasactionController {
     @GetUser() user: User,
   ) {
     return this.trasactionService.createRO26(user, ro26Dto.subject);
+  }
+
+  @Roles(Role.Teacher)
+  @Get()
+  getListDocuemnt(
+    @GetUser() user: User,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.trasactionService.getListDocument(user, paginationDto);
   }
 }
