@@ -9,13 +9,13 @@ import {
 } from 'class-validator';
 
 export class RO26Dto {
-  @Type(() => Subject)
+  @Type(() => SubjectDto)
   @MaxLength(8)
-  @ValidateNested()
-  subject: Subject[];
+  @ValidateNested({ each: true })
+  subject: Array<SubjectDto>;
 }
 
-class Subject {
+export class SubjectDto {
   @IsEmpty()
   @IsString()
   course_code: string;
