@@ -1,5 +1,5 @@
 import { User } from 'src/user/entity/user.entity';
-import { EntityRepository, Repository, Transaction } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 import {
   DocumentRO01,
   PREFIX_RO01,
@@ -15,24 +15,39 @@ import {
   TransactionDocument,
 } from './entity/trasaction.entity';
 import { DocumentType } from './entity/document-type.entity';
+import { Approve, PREFIX_APPROVE } from './entity/appove.entity';
+import { InternalServerErrorException } from '@nestjs/common';
 
+// TODO: add trasaction for insert data
 @EntityRepository(DocumentRO01)
 export class RO01Repository extends Repository<DocumentRO01> {
   async createDocumentRO01(
     ro01Dto: RO01Dto,
     user: User,
-    type: DocumentType,
+    typeDoc: DocumentType,
+    teachers: Array<User>,
   ): Promise<any> {
-    const { title, to_name } = ro01Dto;
+    const { title, to_name, reason } = ro01Dto;
 
     // Document ro01...
     const roDoc = new DocumentRO01();
     roDoc.id = `${PREFIX_RO01} ${uuidv4()}`;
     roDoc.title = title;
     roDoc.to_name = to_name;
+    roDoc.reason = reason;
     roDoc.createBy = user.id;
     roDoc.create_date = new Date();
     roDoc.update_date = new Date();
+
+    // transaction...
+    const trasaction = new TransactionDocument();
+    trasaction.id = `${PREFIX_TRASACTION} ${uuidv4()}`;
+    trasaction.credit = 1;
+    trasaction.type = typeDoc;
+    trasaction.user = user;
+    trasaction.success = false;
+    trasaction.create_date = new Date();
+    trasaction.update_date = new Date();
 
     // map document...
     const map = new MappingDocument();
@@ -41,15 +56,33 @@ export class RO01Repository extends Repository<DocumentRO01> {
     map.create_date = new Date();
     map.update_date = new Date();
 
-    // transaction...
-    const trasaction = new TransactionDocument();
-    trasaction.id = `${PREFIX_TRASACTION} ${uuidv4()}`;
-    trasaction.credit = 0;
-    trasaction.type = type;
-    trasaction.create_date = new Date();
-    trasaction.update_date = new Date();
-
     // approve...
+    const approvies: Array<Approve> = [];
+    let index = 1;
+    for (const teacher of teachers) {
+      const approve = new Approve();
+      approve.id = `${PREFIX_APPROVE} ${uuidv4()}`;
+      approve.status = `waiting`;
+      approve.comment = '';
+      approve.step = index;
+      approve.teacher_id = teacher.id;
+      approve.transaction = trasaction;
+      approve.exprieDate = new Date();
+      approve.create_date = new Date();
+      approve.update_date = new Date();
+      approvies.push(approve);
+      index += 1;
+    }
+
+    trasaction.mapping = map;
+    trasaction.approve = approvies;
+
+    try {
+      await trasaction.save();
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
 
     return null;
   }
