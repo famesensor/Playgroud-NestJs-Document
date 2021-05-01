@@ -10,6 +10,18 @@ export class PaginationDto {
   @IsString()
   @IsOptional()
   id: string;
+
+  @IsString()
+  @IsOptional()
+  filter_type: string;
+
+  @IsString()
+  @IsOptional()
+  order: string; // acs, desc
+
+  @IsString()
+  @IsOptional()
+  sort: string; // column name, std_id
 }
 
 export interface PaginationRes {
