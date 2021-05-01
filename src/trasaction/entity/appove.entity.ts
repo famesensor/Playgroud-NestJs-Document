@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { TransactionDocument } from './trasaction.entity';
 
+export const PREFIX_APPROVE = `approve_`;
 @Entity()
 export class Approve extends BaseEntity {
   @PrimaryColumn()
@@ -27,16 +28,16 @@ export class Approve extends BaseEntity {
   @Column()
   step: number;
 
-  @Column()
-  exprieDate: number;
+  @Column({ type: 'timestamptz', nullable: true })
+  exprieDate: Date;
 
-  @ManyToOne(() => TransactionDocument)
+  @ManyToOne(() => TransactionDocument, (trasaction) => trasaction.approve)
   @JoinColumn()
   transaction: TransactionDocument;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   create_date: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   update_date: Date;
 }

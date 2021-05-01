@@ -16,16 +16,15 @@ export class DocumentRO26 extends BaseEntity {
 
   @OneToMany(() => RO26Course, (ro26course) => ro26course.documentRO26, {
     cascade: true,
-    eager: true,
   })
   ro26course: RO26Course[];
 
   @Column()
   createBy: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   create_date: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   update_date: Date;
 }

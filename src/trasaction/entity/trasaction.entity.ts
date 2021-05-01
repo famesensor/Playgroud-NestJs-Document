@@ -7,10 +7,12 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Approve } from './appove.entity';
+import { MappingDocument } from './document-mapping.entity';
 import { DocumentType } from './document-type.entity';
 
 export const PREFIX_TRASACTION = `trasaction_document_`;
@@ -27,15 +29,24 @@ export class TransactionDocument extends BaseEntity {
   @JoinColumn()
   type: DocumentType;
 
-  @OneToMany(() => Approve, (approve) => approve.transaction)
+  @OneToMany(() => Approve, (approve) => approve.transaction, { cascade: true })
+  @JoinColumn()
   approve: Approve[];
+
+  @OneToOne(() => MappingDocument, (mapping) => mapping.trasaction, {
+    cascade: true,
+  })
+  mapping: MappingDocument;
 
   @Column()
   credit: number;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @Column()
+  success: boolean;
+
+  @CreateDateColumn({ type: 'timestamptz' })
   create_date: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   update_date: Date;
 }

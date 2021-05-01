@@ -34,9 +34,9 @@ export class RO26Course extends BaseEntity {
   @Column()
   createBy: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   create_date: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   update_date: Date;
 }

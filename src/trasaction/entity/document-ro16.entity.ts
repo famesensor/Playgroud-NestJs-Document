@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+export const PREFIX_RO16 = `document_ro16_`;
 @Entity()
 export class DocumentRO16 extends BaseEntity {
   @PrimaryColumn()
@@ -36,9 +37,9 @@ export class DocumentRO16 extends BaseEntity {
   @Column()
   createBy: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   create_date: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   update_date: Date;
 }

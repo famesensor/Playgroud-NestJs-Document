@@ -20,9 +20,9 @@ export class DocumentType extends BaseEntity {
   @OneToMany(() => TransactionDocument, (transaction) => transaction.type)
   transaction: TransactionDocument;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   create_date: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   update_date: Date;
 }

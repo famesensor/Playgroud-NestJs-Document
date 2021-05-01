@@ -20,11 +20,14 @@ export class DocumentRO01 extends BaseEntity {
   to_name: string;
 
   @Column()
+  reason: string;
+
+  @Column()
   createBy: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   create_date: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   update_date: Date;
 }
