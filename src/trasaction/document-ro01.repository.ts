@@ -31,7 +31,7 @@ export class RO01Repository extends Repository<DocumentRO01> {
 
     // Document ro01...
     const roDoc = new DocumentRO01();
-    roDoc.id = `${PREFIX_RO01} ${uuidv4()}`;
+    roDoc.id = `${PREFIX_RO01}${uuidv4()}`;
     roDoc.title = title;
     roDoc.to_name = to_name;
     roDoc.reason = reason;
@@ -41,7 +41,7 @@ export class RO01Repository extends Repository<DocumentRO01> {
 
     // transaction...
     const trasaction = new TransactionDocument();
-    trasaction.id = `${PREFIX_TRASACTION} ${uuidv4()}`;
+    trasaction.id = `${PREFIX_TRASACTION}${uuidv4()}`;
     trasaction.credit = 1;
     trasaction.type = typeDoc;
     trasaction.user = user;
@@ -49,9 +49,9 @@ export class RO01Repository extends Repository<DocumentRO01> {
     trasaction.create_date = new Date();
     trasaction.update_date = new Date();
 
-    // map document...
+    // map document..
     const map = new MappingDocument();
-    map.id = `${PREFIX_MAPPING} ${uuidv4()}`;
+    map.id = `${PREFIX_MAPPING}${uuidv4()}`;
     map.documentRO01 = roDoc;
     map.create_date = new Date();
     map.update_date = new Date();
@@ -61,7 +61,7 @@ export class RO01Repository extends Repository<DocumentRO01> {
     let index = 1;
     for (const teacher of teachers) {
       const approve = new Approve();
-      approve.id = `${PREFIX_APPROVE} ${uuidv4()}`;
+      approve.id = `${PREFIX_APPROVE}${uuidv4()}`;
       approve.status = `waiting`;
       approve.comment = '';
       approve.step = index;
