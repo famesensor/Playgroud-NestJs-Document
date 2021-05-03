@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
@@ -18,6 +19,7 @@ export class DocumentRO26 extends BaseEntity {
   @OneToMany(() => RO26Course, (ro26course) => ro26course.documentRO26, {
     cascade: true,
   })
+  @JoinColumn()
   ro26course: RO26Course[];
 
   @Column()
