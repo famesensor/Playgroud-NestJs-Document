@@ -12,6 +12,7 @@ import { TrasactionService } from './trasaction.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { mailConfig } from 'src/config/mailer.config';
 import { TransactionDocument } from './entity/trasaction.entity';
+import { Approve } from './entity/approve.entity';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TransactionDocument } from './entity/trasaction.entity';
       RO26Repository,
       DocumentType,
       TransactionDocument,
+      Approve,
       UserRepository,
     ]),
     AuthenticationModule,
