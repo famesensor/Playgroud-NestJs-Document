@@ -7,6 +7,7 @@ import * as config from 'config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload } from './jwt.payload';
 import { User } from 'src/user/entity/user.entity';
+import { Role } from 'src/shared/enums/role.enum';
 
 const jwtConfig = config.get('jwt');
 
@@ -39,6 +40,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
+
+    if (user.role !== 'student') user.role = Role.Teacher;
 
     return user;
   }
