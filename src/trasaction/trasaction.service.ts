@@ -1,4 +1,6 @@
 import {
+  BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -21,6 +23,9 @@ import {
   PaginationRes,
 } from 'src/shared/dto/pagination/pagination.dto';
 import { TransactionDocument } from './entity/trasaction.entity';
+import { CommentDto } from './dto/create-comment.dto';
+import { Approve } from './entity/approve.entity';
+import { addMinutes } from 'src/utils/date';
 
 @Injectable()
 export class TrasactionService {
@@ -32,7 +37,8 @@ export class TrasactionService {
     @InjectRepository(RO16Repository) private re16Repository: RO16Repository,
     @InjectRepository(RO26Repository) private re26Repository: RO26Repository,
     @InjectRepository(TransactionDocument)
-    private trasactionRepositoy: Repository<TransactionDocument>,
+    private trasactionRepository: Repository<TransactionDocument>,
+    @InjectRepository(Approve) private approveRepository: Repository<Approve>,
     private mailerService: MailerService,
   ) {}
 
@@ -71,6 +77,7 @@ export class TrasactionService {
     return { status: true, message: 'success' };
   }
 
+  // TODO: send email
   // create document ro16...
   async createRO16(user: User, ro16Dto: RO16Dto): Promise<any> {
     // get student info...
@@ -105,6 +112,7 @@ export class TrasactionService {
     return { status: true, message: 'success' };
   }
 
+  // TODO: send email
   // create document ro26...
   async createRO26(user: User, subject: SubjectDto[]): Promise<any> {
     // get student info...
@@ -112,7 +120,7 @@ export class TrasactionService {
 
     // get type document...
     const typeInfo = await this.documentType.findOne({
-      type_name: 'RO-16 คำร้องขอลาป่วย ลากิจ',
+      type_name: 'RO-26 ใบลงทะเบียนเพิ่ม-ลด-ถอน-เปลี่ยนกลุ่ม-เปลี่ยนรายวิชา',
     });
     if (!typeInfo) {
       throw new NotFoundException(`RO26 Type Not Found.`);
@@ -140,20 +148,26 @@ export class TrasactionService {
     return { status: true, message: 'success' };
   }
 
+  // get documents...
   async getListDocument(
     user: User,
     paginationDto: PaginationDto,
   ): Promise<PaginationRes> {
-    const { id, limit, filter_type, sort, order } = paginationDto;
-    let doc = this.trasactionRepositoy
+    const { limit, filter_type, sort, order, page } = paginationDto;
+    let doc = this.trasactionRepository
       .createQueryBuilder('trasaction_document')
       .leftJoinAndSelect('trasaction_document.user', 'user')
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-      .leftJoinAndSelect('trasaction_document.type', 'type');
+      .leftJoinAndSelect('trasaction_document.type', 'type')
+      .leftJoin('trasaction_document.approve', 'approve')
+      .where('approve.teacher_id = :id', { id: user.id })
+      .andWhere('trasaction_document.credit = approve.step');
 
     // filter type document...
     if (filter_type) {
-      doc = doc.where('type.type_name = :typename', { typename: filter_type });
+      doc = doc.andWhere('type.type_name = :typename', {
+        typename: filter_type,
+      });
     }
 
     // sort by column...
@@ -179,21 +193,176 @@ export class TrasactionService {
       else doc = doc.addOrderBy('trasaction_document.create_date', 'DESC');
     }
 
-    if (id) {
-      doc = doc.where('trasaction.id > :id', { id: id });
-    }
-
     // limit
-    doc = doc.limit(limit != 0 ? limit : 10);
+    limit != 0 ? limit : 10;
+    const offset = (page - 1) * limit;
 
-    console.log(doc.getSql());
-
-    const res = await doc.getMany();
+    const [res, resCount] = await Promise.all([
+      doc.offset(offset).limit(limit).getMany(),
+      doc.getCount(),
+    ]);
 
     return {
       status: true,
       data: res,
+      page: page,
+      total: resCount < limit ? 1 : Math.floor(resCount / limit),
     };
+  }
+
+  // get document...
+  async getDocument(id: string): Promise<any> {
+    const doc = await this.trasactionRepository
+      .createQueryBuilder('trasaction_document')
+      .leftJoinAndSelect('trasaction_document.user', 'user')
+      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('trasaction_document.mapping', 'mapping')
+      .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
+      .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
+      .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
+      .where('trasaction_document.id = :id', {
+        id: id,
+      })
+      .getOne();
+
+    if (!doc) {
+      throw new NotFoundException('Document Not Found');
+    }
+
+    return { status: true, data: doc };
+  }
+
+  // TODO: send email...
+  // approve and comment docuement...
+  async approveDocument(
+    id: string,
+    userId: string,
+    commentDto: CommentDto,
+  ): Promise<any> {
+    const { comment } = commentDto;
+    console.log(id, userId, comment);
+
+    const docRes = await this.trasactionRepository
+      .createQueryBuilder('trasaction_document')
+      .leftJoinAndSelect('trasaction_document.approve', 'approve')
+      .where('trasaction_document.id = :id', { id })
+      .andWhere(
+        'approve.teacher_id = :teacher_id AND approve.status = :status',
+        {
+          teacher_id: userId,
+          status: 'waiting',
+        },
+      )
+      .getOne();
+
+    if (!docRes) throw new NotFoundException(`Document Not Found.`);
+
+    if (docRes.success) throw new BadRequestException();
+
+    if (docRes.credit !== docRes.approve[0].step)
+      throw new BadRequestException();
+
+    try {
+      // update approve...
+      await this.approveRepository
+        .createQueryBuilder('approve')
+        .update(Approve)
+        .set({
+          comment: comment,
+          expire_date: addMinutes(new Date(), 5),
+          update_date: new Date(),
+        })
+        .where('approve.id = :id', { id: docRes.approve[0].id })
+        .execute();
+
+      // update trasaction...
+      await this.trasactionRepository
+        .createQueryBuilder('trasaction_document')
+        .update(TransactionDocument)
+        .set({
+          update_date: new Date(),
+        })
+        .execute();
+
+      // send email to teacher, student...
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+
+    return { status: true, message: 'success' };
+  }
+
+  // TODO: send email
+  // confirm approve doucment...
+  async confirmApprove(id: string, approveId: string): Promise<any> {
+    const docRes = await this.trasactionRepository
+      .createQueryBuilder('trasaction_document')
+      .leftJoinAndSelect('trasaction_document.user', 'user')
+      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('trasaction_document.approve', 'approve')
+      .where('trasaction_document.id = :id AND approve.status = :status', {
+        id,
+        status: 'waiting',
+      })
+      .orderBy('approve.step', 'ASC')
+      .getOne();
+
+    if (!docRes) throw new NotFoundException('Document Not Found.');
+    console.log(docRes.approve);
+
+    const index = docRes.approve.findIndex((item) => {
+      return item.id === approveId && item.step === docRes.credit;
+    });
+    if (!docRes.approve[index]) throw new BadRequestException();
+
+    let isSuccess = false;
+    let email = '';
+    if (docRes.approve.length === 1) {
+      isSuccess = true;
+      email = docRes.user.email;
+    } else {
+      // get email teacher...
+      const teacher = await this.userRepository.findOne({
+        id: docRes.approve[index + 1].teacher_id,
+      });
+      email = teacher.email;
+    }
+
+    if (new Date() >= docRes.approve[index].expire_date)
+      throw new BadRequestException();
+
+    try {
+      // update approve...
+      await this.approveRepository
+        .createQueryBuilder('approve')
+        .update(Approve)
+        .set({
+          status: 'success',
+          expire_date: null,
+          update_date: new Date(),
+        })
+        .where('approve.id = :id', { id: docRes.approve[0].id })
+        .execute();
+
+      // update trasaction...
+      await this.trasactionRepository
+        .createQueryBuilder('trasaction_document')
+        .update(TransactionDocument)
+        .set({
+          success: isSuccess,
+          credit: () => 'credit + 1',
+          update_date: new Date(),
+        })
+        .execute();
+
+      // send email...
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+
+    return { status: true, message: 'success' };
   }
 
   // send email to ...
