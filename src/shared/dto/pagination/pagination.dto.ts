@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class PaginationDto {
   @Type(() => Number)
@@ -7,9 +7,10 @@ export class PaginationDto {
   @IsOptional()
   limit: number;
 
-  @IsString()
-  @IsOptional()
-  id: string;
+  @Type(() => Number)
+  @IsNumber()
+  @IsNotEmpty()
+  page: number;
 
   @IsString()
   @IsOptional()
@@ -26,5 +27,7 @@ export class PaginationDto {
 
 export interface PaginationRes {
   status: boolean;
+  page: number;
+  total: number;
   data: any[];
 }
