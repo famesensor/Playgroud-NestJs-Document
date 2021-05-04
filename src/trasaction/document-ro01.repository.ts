@@ -68,7 +68,7 @@ export class RO01Repository extends Repository<DocumentRO01> {
       approve.status = `waiting`;
       approve.comment = '';
       approve.step = index;
-      approve.teacher_id = teacher.id;
+      approve.teacher = teacher;
       approve.transaction = trasaction;
       // approve.exprieDate = new Date();
       approve.create_date = new Date();

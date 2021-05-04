@@ -77,7 +77,7 @@ export class RO26Repository extends Repository<DocumentRO26> {
       approve.status = `waiting`;
       approve.comment = '';
       approve.step = index;
-      approve.teacher_id = teacher.id;
+      approve.teacher = teacher;
       approve.transaction = trasaction;
       // approve.exprieDate = null;
       approve.create_date = new Date();
