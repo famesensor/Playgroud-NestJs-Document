@@ -7,6 +7,9 @@ export interface IEmailOption {
     student_id: string;
     name: string;
     validate_url?: string;
-    file?: any;
+    file?: {
+      file_name: string;
+      content: Buffer;
+    };
   };
 }
