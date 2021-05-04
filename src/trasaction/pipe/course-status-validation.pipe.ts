@@ -3,7 +3,7 @@ import {
   BadRequestException,
   PipeTransform,
 } from '@nestjs/common';
-import { CourseStatus } from '../enum/course-status.enum';
+import { CourseStatus } from '../enum/trasaction.enum';
 
 export class CourseTypeValidationPipe implements PipeTransform {
   readonly allowedStatus = [
