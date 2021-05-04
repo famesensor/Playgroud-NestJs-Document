@@ -26,6 +26,7 @@ import { TransactionDocument } from './entity/trasaction.entity';
 import { CommentDto } from './dto/create-comment.dto';
 import { Approve } from './entity/approve.entity';
 import { addMinutes } from 'src/utils/date';
+import { IEmailOption } from 'src/interfaces/IEmailOption';
 
 @Injectable()
 export class TrasactionService {
@@ -240,10 +241,11 @@ export class TrasactionService {
     commentDto: CommentDto,
   ): Promise<any> {
     const { comment } = commentDto;
-    console.log(id, userId, comment);
-
     const docRes = await this.trasactionRepository
       .createQueryBuilder('trasaction_document')
+      .leftJoinAndSelect('trasaction_document.user', 'user')
+      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('trasaction_document.type', 'type')
       .leftJoinAndSelect('trasaction_document.approve', 'approve')
       .where('trasaction_document.id = :id', { id })
       .andWhere(
@@ -261,6 +263,9 @@ export class TrasactionService {
 
     if (docRes.credit !== docRes.approve[0].step)
       throw new BadRequestException();
+
+    const teacher = await this.userRepository.getUserDetail(userId);
+    if (!teacher) throw new NotFoundException(`Teacher Not Found.`);
 
     try {
       // update approve...
@@ -284,7 +289,20 @@ export class TrasactionService {
         })
         .execute();
 
-      // send email to teacher, student...
+      // send email to teacher
+      const option: IEmailOption = {
+        to: teacher.email,
+        subject: `ท่านได้ทำการตอบรับคำร้องขอ ${docRes.type.type_name}`,
+        template: '/templates/mail',
+        context: {
+          name: docRes.user.name,
+          student_id: docRes.user.studentInfo.student_code,
+          type_name: docRes.type.type_name,
+          validate_url: `http://localhost:3000/api/trasaction/${id}/approve/${docRes.approve[0].id}`,
+        },
+      };
+
+      await this.sendEmail(option);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
@@ -300,6 +318,7 @@ export class TrasactionService {
       .createQueryBuilder('trasaction_document')
       .leftJoinAndSelect('trasaction_document.user', 'user')
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('trasaction_document.type', 'type')
       .leftJoinAndSelect('trasaction_document.approve', 'approve')
       .where('trasaction_document.id = :id AND approve.status = :status', {
         id,
@@ -309,7 +328,6 @@ export class TrasactionService {
       .getOne();
 
     if (!docRes) throw new NotFoundException('Document Not Found.');
-    console.log(docRes.approve);
 
     const index = docRes.approve.findIndex((item) => {
       return item.id === approveId && item.step === docRes.credit;
@@ -318,15 +336,21 @@ export class TrasactionService {
 
     let isSuccess = false;
     let email = '';
+    let subject = '';
+    let template = '';
     if (docRes.approve.length === 1) {
       isSuccess = true;
       email = docRes.user.email;
+      subject = `คำร้องขอ ${docRes.type.type_name} ของนักศึกษาได้รับการตอบร้อบแล้ว`;
+      template = `/templates/student`;
     } else {
       // get email teacher...
       const teacher = await this.userRepository.findOne({
         id: docRes.approve[index + 1].teacher_id,
       });
       email = teacher.email;
+      subject = `ท่านมีคำร้องขอ ${docRes.type.type_name} ที่รอการตอบรับ`;
+      template = `/templates/teachmail`;
     }
 
     if (new Date() >= docRes.approve[index].expire_date)
@@ -356,7 +380,20 @@ export class TrasactionService {
         })
         .execute();
 
-      // send email...
+      // send email to teacher
+      const option: IEmailOption = {
+        to: email,
+        subject: subject,
+        template: template,
+        context: {
+          name: docRes.user.name,
+          student_id: docRes.user.studentInfo.student_code,
+          type_name: docRes.type.type_name,
+          file: null,
+        },
+      };
+
+      await this.sendEmail(option);
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
@@ -366,13 +403,19 @@ export class TrasactionService {
   }
 
   // send email to ...
-  private async sendEmail(): Promise<any> {
+  private async sendEmail(option: IEmailOption): Promise<any> {
     try {
       return await this.mailerService.sendMail({
-        to: '',
-        subject: '',
-        template: '',
-        context: {},
+        to: option.to,
+        subject: option.subject,
+        template: __dirname + option.template,
+        context: {
+          name: option.context.name,
+          student_id: option.context.student_id,
+          type_name: option.context.type_name,
+          file: option.context.file,
+          validate_url: option.context.validate_url,
+        },
       });
     } catch (error) {
       console.log(error);
