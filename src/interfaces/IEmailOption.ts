@@ -1,4 +1,4 @@
-export class IEmailOption {
+export interface IEmailOption {
   to: string;
   subject: string;
   template: string;
@@ -6,7 +6,7 @@ export class IEmailOption {
     type_name: string;
     student_id: string;
     name: string;
-    validate_url: string;
-    file: any;
+    validate_url?: string;
+    file?: any;
   };
 }
