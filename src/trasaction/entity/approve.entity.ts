@@ -1,3 +1,4 @@
+import { User } from 'src/user/entity/user.entity';
 import {
   BaseEntity,
   Column,
@@ -16,8 +17,9 @@ export class Approve extends BaseEntity {
   @PrimaryColumn()
   id: string;
 
-  @Column()
-  teacher_id: string;
+  @ManyToOne(() => User, (user) => user.approve)
+  @JoinColumn()
+  teacher: User;
 
   @Column()
   status: string;
