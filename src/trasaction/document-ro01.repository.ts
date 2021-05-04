@@ -1,5 +1,5 @@
 import { User } from 'src/user/entity/user.entity';
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, getConnection, Repository } from 'typeorm';
 import {
   DocumentRO01,
   PREFIX_RO01,
@@ -27,6 +27,9 @@ export class RO01Repository extends Repository<DocumentRO01> {
     typeDoc: DocumentType,
     teachers: Array<User>,
   ): Promise<any> {
+    const connection = getConnection();
+    const queryRunner = connection.createQueryRunner();
+
     const { title, to_name, reason } = ro01Dto;
 
     // Document ro01...
@@ -77,11 +80,17 @@ export class RO01Repository extends Repository<DocumentRO01> {
     trasaction.mapping = map;
     trasaction.approve = approvies;
 
+    await queryRunner.startTransaction();
+
     try {
-      await trasaction.save();
+      await queryRunner.manager.save(trasaction);
+      await queryRunner.commitTransaction();
     } catch (error) {
       console.log(error);
+      await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
     }
 
     return null;

@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/shared/enums/role.enum';
 import { User } from 'src/user/entity/user.entity';
 import { UserRepository } from 'src/user/user.repository';
-import { Repository } from 'typeorm';
+import { getConnection, Repository } from 'typeorm';
 import { RO01Repository } from './document-ro01.repository';
 import { RO16Repository } from './document-ro16.repository';
 import { RO26Repository } from './document-ro26.repository';
@@ -43,7 +43,6 @@ export class TrasactionService {
     private mailerService: MailerService,
   ) {}
 
-  // TODO: send email
   // create document ro01...
   async createRO01(user: User, ro01Dto: RO01Dto): Promise<any> {
     // get student info...
@@ -69,16 +68,35 @@ export class TrasactionService {
       throw new NotFoundException(`Head of Department Not Found.`);
     }
     teachers.push(info.advisee.advicer, leader, boss);
-    await this.ro01Repository.createDocumentRO01(
-      ro01Dto,
-      info,
-      typeInfo,
-      teachers,
-    );
+
+    try {
+      await this.ro01Repository.createDocumentRO01(
+        ro01Dto,
+        info,
+        typeInfo,
+        teachers,
+      );
+
+      // sned email...
+      const option: IEmailOption = {
+        to: info.advisee.advicer.email,
+        subject: `ท่านมีคำร้องขอ ${typeInfo.type_name} ที่รอการตอบรับ`,
+        template: `/templates/teachmail`,
+        context: {
+          name: info.name,
+          student_id: info.studentInfo.student_code,
+          type_name: typeInfo.type_name,
+        },
+      };
+      await this.sendEmail(option);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+
     return { status: true, message: 'success' };
   }
 
-  // TODO: send email
   // create document ro16...
   async createRO16(user: User, ro16Dto: RO16Dto): Promise<any> {
     // get student info...
@@ -104,16 +122,35 @@ export class TrasactionService {
       throw new NotFoundException(`Head of Department Not Found.`);
     }
     teachers.push(info.advisee.advicer, leader, boss);
-    await this.re16Repository.createDocumentRO16(
-      ro16Dto,
-      user,
-      typeInfo,
-      teachers,
-    );
+
+    try {
+      await this.re16Repository.createDocumentRO16(
+        ro16Dto,
+        user,
+        typeInfo,
+        teachers,
+      );
+
+      // sned email...
+      const option: IEmailOption = {
+        to: info.advisee.advicer.email,
+        subject: `ท่านมีคำร้องขอ ${typeInfo.type_name} ที่รอการตอบรับ`,
+        template: `/templates/teachmail`,
+        context: {
+          name: info.name,
+          student_id: info.studentInfo.student_code,
+          type_name: typeInfo.type_name,
+        },
+      };
+      await this.sendEmail(option);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
+
     return { status: true, message: 'success' };
   }
 
-  // TODO: send email
   // create document ro26...
   async createRO26(user: User, subject: SubjectDto[]): Promise<any> {
     // get student info...
@@ -139,13 +176,31 @@ export class TrasactionService {
       throw new NotFoundException(`Head of Department Not Found.`);
     }
     teachers.push(info.advisee.advicer, leader, boss);
-    await this.re26Repository.createDocumentRO16(
-      subject,
-      info,
-      typeInfo,
-      teachers,
-    );
 
+    try {
+      await this.re26Repository.createDocumentRO16(
+        subject,
+        info,
+        typeInfo,
+        teachers,
+      );
+
+      // sned email...
+      const option: IEmailOption = {
+        to: info.advisee.advicer.email,
+        subject: `ท่านมีคำร้องขอ ${typeInfo.type_name} ที่รอการตอบรับ`,
+        template: `/templates/teachmail`,
+        context: {
+          name: info.name,
+          student_id: info.studentInfo.student_code,
+          type_name: typeInfo.type_name,
+        },
+      };
+      await this.sendEmail(option);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
     return { status: true, message: 'success' };
   }
 
@@ -217,6 +272,7 @@ export class TrasactionService {
       .createQueryBuilder('trasaction_document')
       .leftJoinAndSelect('trasaction_document.user', 'user')
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('trasaction_document.type', 'type')
       .leftJoinAndSelect('trasaction_document.mapping', 'mapping')
       .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
       .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
@@ -233,7 +289,6 @@ export class TrasactionService {
     return { status: true, data: doc };
   }
 
-  // TODO: send email...
   // approve and comment docuement...
   async approveDocument(
     id: string,
@@ -241,6 +296,9 @@ export class TrasactionService {
     commentDto: CommentDto,
   ): Promise<any> {
     const { comment } = commentDto;
+    const connection = getConnection();
+    const queryRunner = connection.createQueryRunner();
+
     const docRes = await this.trasactionRepository
       .createQueryBuilder('trasaction_document')
       .leftJoinAndSelect('trasaction_document.user', 'user')
@@ -267,27 +325,30 @@ export class TrasactionService {
     const teacher = await this.userRepository.getUserDetail(userId);
     if (!teacher) throw new NotFoundException(`Teacher Not Found.`);
 
+    await queryRunner.startTransaction();
+
     try {
       // update approve...
-      await this.approveRepository
-        .createQueryBuilder('approve')
-        .update(Approve)
-        .set({
+      await queryRunner.manager.update(
+        Approve,
+        { id: docRes.approve[0].id },
+        {
           comment: comment,
           expire_date: addMinutes(new Date(), 5),
           update_date: new Date(),
-        })
-        .where('approve.id = :id', { id: docRes.approve[0].id })
-        .execute();
+        },
+      );
 
       // update trasaction...
-      await this.trasactionRepository
-        .createQueryBuilder('trasaction_document')
-        .update(TransactionDocument)
-        .set({
+      await queryRunner.manager.update(
+        TransactionDocument,
+        { id: id },
+        {
           update_date: new Date(),
-        })
-        .execute();
+        },
+      );
+
+      await queryRunner.commitTransaction();
 
       // send email to teacher
       const option: IEmailOption = {
@@ -305,15 +366,20 @@ export class TrasactionService {
       await this.sendEmail(option);
     } catch (error) {
       console.log(error);
+      await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
     }
 
     return { status: true, message: 'success' };
   }
 
-  // TODO: send email
   // confirm approve doucment...
   async confirmApprove(id: string, approveId: string): Promise<any> {
+    const connection = getConnection();
+    const queryRunner = connection.createQueryRunner();
+
     const docRes = await this.trasactionRepository
       .createQueryBuilder('trasaction_document')
       .leftJoinAndSelect('trasaction_document.user', 'user')
@@ -356,29 +422,26 @@ export class TrasactionService {
     if (new Date() >= docRes.approve[index].expire_date)
       throw new BadRequestException();
 
+    await queryRunner.startTransaction();
+
     try {
       // update approve...
-      await this.approveRepository
-        .createQueryBuilder('approve')
-        .update(Approve)
-        .set({
-          status: 'success',
-          expire_date: null,
-          update_date: new Date(),
-        })
-        .where('approve.id = :id', { id: docRes.approve[0].id })
-        .execute();
+      await queryRunner.manager.update(
+        Approve,
+        { id: docRes.approve[0].id },
+        { status: 'success', expire_date: null, update_date: new Date() },
+      );
 
       // update trasaction...
-      await this.trasactionRepository
-        .createQueryBuilder('trasaction_document')
-        .update(TransactionDocument)
-        .set({
+      await queryRunner.manager.update(
+        TransactionDocument,
+        { id: id },
+        {
           success: isSuccess,
           credit: () => 'credit + 1',
           update_date: new Date(),
-        })
-        .execute();
+        },
+      );
 
       // send email to teacher
       const option: IEmailOption = {
@@ -392,11 +455,13 @@ export class TrasactionService {
           file: null,
         },
       };
-
       await this.sendEmail(option);
     } catch (error) {
       console.log(error);
+      await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
     }
 
     return { status: true, message: 'success' };

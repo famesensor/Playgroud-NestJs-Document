@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { User } from 'src/user/entity/user.entity';
 import { UUIDGen } from 'src/utils/uuid';
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, getConnection, Repository } from 'typeorm';
 import { RO16Dto } from './dto/create-ro16.dto';
 import { Approve, PREFIX_APPROVE } from './entity/approve.entity';
 import {
@@ -32,6 +32,8 @@ export class RO16Repository extends Repository<DocumentRO16> {
       start_date,
       end_date,
     } = ro16Dto;
+    const connection = getConnection();
+    const queryRunner = connection.createQueryRunner();
 
     // document...
     const roDoc = new DocumentRO16();
@@ -84,11 +86,17 @@ export class RO16Repository extends Repository<DocumentRO16> {
     trasaction.mapping = map;
     trasaction.approve = approvies;
 
+    await queryRunner.startTransaction();
+
     try {
-      await trasaction.save();
+      await queryRunner.manager.save(trasaction);
+      await queryRunner.commitTransaction();
     } catch (error) {
       console.log(error);
+      await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
     }
 
     return null;
