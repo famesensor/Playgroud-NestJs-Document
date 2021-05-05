@@ -54,12 +54,7 @@ export class TrasactionService {
     const info = await this.userRepository.getUserDetail(user.id);
 
     // get type document...
-    const typeInfo = await this.documentType.findOne({
-      type_name: 'RO-01 คำร้องทั่วไป',
-    });
-    if (!typeInfo) {
-      throw new NotFoundException(`RO01 Type Not Found.`);
-    }
+    const typeInfo = await this.getTypeDocument(TypeDocument.RO01);
 
     // get teacher list...
     const teachers: User[] = [];
@@ -103,12 +98,7 @@ export class TrasactionService {
     const info = await this.userRepository.getUserDetail(user.id);
 
     // get type document...
-    const typeInfo = await this.documentType.findOne({
-      type_name: 'RO-16 คำร้องขอลาป่วย ลากิจ',
-    });
-    if (!typeInfo) {
-      throw new NotFoundException(`RO16 Type Not Found.`);
-    }
+    const typeInfo = await this.getTypeDocument(TypeDocument.RO16);
 
     // get teacher list...
     const teachers: User[] = [];
@@ -140,6 +130,7 @@ export class TrasactionService {
           name: info.name,
           student_id: info.studentInfo.student_code,
           type_name: typeInfo.type_name,
+          file: null,
         },
       };
       await this.sendEmail(option);
@@ -157,12 +148,7 @@ export class TrasactionService {
     const info = await this.userRepository.getUserDetail(user.id);
 
     // get type document...
-    const typeInfo = await this.documentType.findOne({
-      type_name: 'RO-26 ใบลงทะเบียนเพิ่ม-ลด-ถอน-เปลี่ยนกลุ่ม-เปลี่ยนรายวิชา',
-    });
-    if (!typeInfo) {
-      throw new NotFoundException(`RO26 Type Not Found.`);
-    }
+    const typeInfo = await this.getTypeDocument(TypeDocument.RO26);
 
     // get teacher list...
     const teachers: User[] = [];
@@ -194,6 +180,7 @@ export class TrasactionService {
           name: info.name,
           student_id: info.studentInfo.student_code,
           type_name: typeInfo.type_name,
+          file: null,
         },
       };
       await this.sendEmail(option);
@@ -482,7 +469,7 @@ export class TrasactionService {
         },
       );
       await queryRunner.commitTransaction();
-      console.log(buffer);
+
       // send email to teacher
       const option: IEmailOption = {
         to: email,
@@ -510,8 +497,31 @@ export class TrasactionService {
     return { status: true, message: 'success' };
   }
 
+  // get type document...
+  async getTypeDocument(typeName: string): Promise<DocumentType> {
+    const typeInfo = await this.documentType.findOne({
+      type_name: typeName,
+    });
+
+    if (!typeInfo) {
+      throw new NotFoundException(`RO01 Type Not Found.`);
+    }
+
+    return typeInfo;
+  }
+
   // send email to ...
   private async sendEmail(option: IEmailOption): Promise<any> {
+    let attachment;
+    if (option.context.file) {
+      attachment = [
+        {
+          filename: option.context.file.file_name,
+          contentType: 'application/pdf',
+          content: option.context.file.content,
+        },
+      ];
+    }
     try {
       return await this.mailerService.sendMail({
         to: option.to,
@@ -524,13 +534,7 @@ export class TrasactionService {
           file: option.context.file,
           validate_url: option.context.validate_url,
         },
-        attachments: [
-          {
-            filename: option.context.file.file_name,
-            contentType: 'application/pdf',
-            content: option.context.file.content,
-          },
-        ],
+        attachments: attachment,
       });
     } catch (error) {
       console.log(error);
