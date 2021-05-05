@@ -1,36 +1,465 @@
 <!DOCTYPE html>
 <html>
-<link rel="stylesheet" href="RO16.css">
+
 <link rel="preconnect" href="https://fonts.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Trirong:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600&display=swap" rel="stylesheet">
+<style type="text/css">
+
+.p1 {
+    overflow: hidden; 
+    position: relative; 
+    background-color: rgb(255, 255, 255); 
+    width: 909px; 
+    height: 1286px;
+    padding: 30px;
+    border: 1px solid tomato;
+}
+
+.head{
+    font-family: 'Trirong', serif;
+    font-size: 30px;
+    font-weight: 200;
+    margin: 0px 0px 2px 0px;
+    text-align: center;
+    justify-content: center;
+    
+}
+
+.headeng {
+    text-align: center;
+    font-family: 'Trirong', serif;
+    font-size: 15px;
+    font-weight: 500;
+    margin: 0px 0px 4px 0px;
+}
+
+.subhead {
+    text-align: center;
+    font-family: 'Trirong', serif;
+    font-size: 15px;
+    font-weight: 300;
+    margin: 0px 0px 4px 0px;
+}
+
+.headright {
+    text-align: right;
+    font-family: 'Trirong', serif;
+    font-size: 30px;
+    font-weight: 600;
+    margin: 0px;
+}
+
+.header {
+    display: flex;
+}
+
+.text {
+    margin-right: 5px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    
+}
+
+.text1 {
+    margin-right: 5px;
+    margin-top: 15px;
+    margin-bottom: 0px;
+    
+}
+
+.text2 {
+    margin-right: 15px;
+    margin-top: 15px;
+    margin-bottom: 0px;
+    
+}
+
+
+.titleadd{
+    font-family: 'Trirong', serif;
+    font-size: 20px;
+    font-weight: 500;
+    margin: 16px 0px 2px 0px;
+    text-align: left;
+    justify-content: center;
+    font-family: 'Trirong', serif;
+    
+}
+
+.img-logo {
+    height: 136px;
+    background-color: transparent;
+    width: 136px;
+    position: relative;
+}
+
+.title {
+    text-align: center;
+    width: 80%;
+    font-family: 'Trirong', serif;
+}
+
+.sb-title{
+    display: flex;
+    justify-content: center;
+}
+
+.form-content {
+    font-family: 'Trirong', serif;
+}
+
+.form-content2 {
+    font-family: 'Trirong', serif;
+}
+
+.ro-26{
+    width: 20%;
+    text-align: right;
+}
+
+
+.row {
+    display: flex;
+}
+
+.col-6 {
+    flex: 0 0 50%;
+}
+
+.col-3 {
+    flex: 0 0 25%;
+}
+
+.col-33 {
+    flex: 0 0 33.33333333333333%;
+    height: 100%;
+    max-width: 33.33333333333333%;
+    word-wrap: break-word;
+}
+
+.info-box {
+    text-align: left;
+    word-wrap: break-word;
+}
+
+
+.comment-box {
+    padding: 5px;
+    border: 1px solid black;
+    margin: 10px 12px;
+    text-align: center;
+}
+
+.col-1 {
+    flex: 0 0 30%;
+    padding: 10px;
+
+}
+
+.col-2 {
+    flex: 0 0 20%;
+}
+
+hr {
+    margin-top: 16px;
+}
+
+.t1 {
+    font-family: 'Trirong', serif;
+    width: 10px;
+    position: absolute;
+    top: 11.4%;
+    left: 47.5%;
+    color: rgb(255, 71, 58);
+}
+
+.t2 {
+    font-family: 'Trirong', serif;
+    width: 40px;
+    position: absolute;
+    top: 11.4%;
+    left: 58.5%;
+    color: rgb(255, 71, 58);
+}
+
+.t54 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 396px;
+    position: absolute;
+    top: 16.0%;
+    left: 6.0%;
+    color: rgb(255, 71, 58);
+}
+
+.t55 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 396px;
+    position: absolute;
+    top: 19.1%;
+    left: 6.0%;
+    color: rgb(255, 71, 58);
+}
+
+.t3 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 250px;
+    position: absolute;
+    top: 25.5%;
+    left: 21.5%;
+    color: rgb(255, 71, 58);
+}
+
+.t4 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 302px;
+    position: absolute;
+    top: 25.5%;
+    left: 64.9%;
+    color: rgb(255, 71, 58);
+}
+
+.t5 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 392px;
+    position: absolute;
+    top: 28.7%;
+    left: 6.8%;
+    color: rgb(255, 71, 58);
+}
+
+.t6 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 330px;
+    position: absolute;
+    top: 28.7%;
+    left: 62.1%;
+    color: rgb(255, 71, 58);
+}
+
+.t7 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 113px;
+    position: absolute;
+    top: 31.9%;
+    left: 13.5%;
+    color: rgb(255, 71, 58);
+}
+
+.t8 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 85px;
+    position: absolute;
+    top: 31.9%;
+    left: 38.5%;
+    color: rgb(255, 71, 58);
+}
+
+.t9 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 164px;
+    position: absolute;
+    top: 31.9%;
+    left: 53.5%;
+    color: rgb(255, 71, 58);
+}
+
+.t10 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 162px;
+    position: absolute;
+    top: 31.9%;
+    left: 79.5%;
+    color: rgb(255, 71, 58);
+}
+
+.t11 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 392px;
+    position: absolute;
+    top: 35.1%;
+    left: 6.9%;
+    color: rgb(255, 71, 58);
+}
+
+.t12 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 385px;
+    position: absolute;
+    top: 35.1%;
+    left: 56.5%;
+    color: rgb(255, 71, 58);
+}
+
+.t56 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 285px;
+    position: absolute;
+    top: 38.3%;
+    left: 13.9%;
+    color: rgb(255, 71, 58);
+}
+
+.t58 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 143px;
+    position: absolute;
+    top: 41.3%;
+    left: 15.2%;
+    color: rgb(255, 71, 58);
+}
+
+.t59 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 220px;
+    position: absolute;
+    top: 41.3%;
+    left: 41.4%;
+    color: rgb(255, 71, 58);
+}
+
+.t60 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 249px;
+    position: absolute;
+    top: 41.3%;
+    left: 70.6%;
+    color: rgb(255, 71, 58);
+}
+
+.t57 {
+    font-family: 'Trirong', serif;
+    text-align: left;
+    width: 850px;
+    position: absolute;
+    top: 46.8%;
+    left: 5.9%;
+    color: rgb(255, 71, 58);
+    word-break: break-word;
+}
+
+.t49 {
+    font-family: 'Trirong', serif;
+    width: 265px;
+    height: 182px;
+    position: absolute;
+    top: 62.6%;
+    left: 5.2%;
+    color: rgb(255, 71, 58);
+    word-break: break-word;
+    text-align: left;
+}
+
+.t50 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 265px;
+    height: 24px;
+    position: absolute;
+    top: 76.2%;
+    left: 5.2%;
+    color: rgb(255, 71, 58);
+    word-break: break-word;
+}
+
+.t51 {
+    font-family: 'Trirong', serif;
+    width: 265px;
+    height: 182px;
+    position: absolute;
+    top: 62.6%;
+    left: 36.4%;
+    color: rgb(255, 71, 58);
+    word-break: break-word;
+    text-align: left;
+}
+
+.t52 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 265px;
+    height: 24px;
+    position: absolute;
+    top: 76.2%;
+    left: 36.4%;
+    color: rgb(255, 71, 58);
+    word-break: break-word;
+}
+
+.t53 {
+    font-family: 'Trirong', serif;
+    text-align: center;
+    width: 265px;
+    height: 24px;
+    position: absolute;
+    top: 76.2%;
+    left: 67.6%;
+    color: rgb(255, 71, 58);
+    word-break: break-word;
+}
+
+.t61 {
+    font-family: 'Trirong', serif;
+    text-align: left;
+    width: 265px;
+    height: 24px;
+    position: absolute;
+    top: 62.6%;
+    left: 67.6%;
+    color: rgb(255, 71, 58);
+    word-break: break-word;
+}
+
+.signature {
+    width: 100px;
+    height: auto;
+}
+
+</style>
 <title> RO16</title>
 <body>
     <div class="p1">
-        <div class="t1"><p>1</p></div>
-        <div class="t2"><p>2553</p></div>
-        <div class="t54"><p>ขอลากิจ</p></div>
-        <div class="t55"><p>อาจารย์ประจำวิชา CSS111</p></div>
-        <div class="t3"><p>รัตนา จงพิศาลพัฒนา</p></div>
-        <div class="t4"><p>60090500445</p></div>
-        <div class="t5"><p>คณะวิทยาศาสตร์</p></div>
-        <div class="t6"><p>วิทยาการคอมพิวเตอร์ประยุกต์</p></div>
-        <div class="t7"><p>ปริญญาตรี</p></div>
-        <div class="t8"><p>2.98</p></div>
-        <div class="t9"><p>4</p></div>
+        <div class="t1"><p><%= locals.student.studentInfo.semeter %></p></div>
+        <div class="t2"><p><%= locals.student.studentInfo.academic_year %></p></div>
+        <div class="t55"><p><%= locals.data.to_name %></p></div>
+        <div class="t55"><p><%= locals.data.attach_one %></p></div>
+        <div class="t55"><p><%= locals.data.attach_two %></p></div>
+        <div class="t3"><p><%= locals.student.name %></p></div>
+        <div class="t4"><p><%= locals.student.studentInfo.student_code %></p></div>
+        <div class="t5"><p><%= locals.student.studentInfo.faculty %></p></div>
+        <div class="t6"><p><%= locals.student.studentInfo.department %></p></div>
+        <div class="t7"><p><%= locals.student.studentInfo.education_level %></p></div>
+        <div class="t8"><p><%= locals.student.studentInfo.gpax %></p></div>
+        <div class="t9"><p><%= locals.student.studentInfo.level %></p></div>
         <div class="t10"><p>ปกติ</p></div>
-        <div class="t11"><p>0633437712</p></div>
-        <div class="t12"><p>thang_thang_rattana@hotmail.com</p></div>
-        <div class="t56"><p>รศ.ชูเกียรติ วรสุชีพ</p></div>
-        <div class="t58"><p>7</p></div>
-        <div class="t59"><p>7 เมษยน 2564</p></div>
-        <div class="t60"><p>14 เมษยน 2564</p></div>
-        <div class="t57"><p>ดังนั้นการลากิจจึงต้องพิจารณาไปตามหลักเกณฑ์และเงื่อนไขที่นายจ้างกำหนดตามข้อบังคับเกี่ยวกับการทำงานหรือบางแห่งอาจมีระเบียบการลากำหนดไว้โดยเฉพาะก็ให้บังคับและปฏิบัติตามระเบียบดังกล่าวได้</p></div>
-        <div class="t49"><p>ยินยอมให้ลาป่วยเนื่องจากอาการของนักศึกษาค่อนข้างรุนแรง และขอให้ดูแลสุขภาพด้วยนะครับ</p></div>
-        <div class="t50"><img class="signature"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t51"><p>ยินยอมให้ลาป่วยเนื่องจากอาการของนักศึกษาค่อนข้างรุนแรง และขอให้ดูแลสุขภาพด้วยนะครับ อย่าลืมที่จะล้างมือและใส่หน้ากากอนามัยทุกครั้งที่ออกจากบ้านนะครับ</p></div>
-        <div class="t52"><img class="signature"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t61"><p>ยินยอมให้ลาป่วยเนื่องจากอาการของนักศึกษาค่อนข้างรุนแรง และขอให้ดูแลสุขภาพด้วยนะครับ อย่าลืมที่จะล้างมือและใส่หน้ากากอนามัยทุกครั้งที่ออกจากบ้านนะครับ</p></div>
-        <div class="t53"><img class="signature"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
+        <div class="t11"><p><%= locals.student.studentInfo.phone %></p></div>
+        <div class="t12"><p><%= locals.student.email %></p></div>
+        <div class="t56"><p><%= locals.approves[0].teacher.name %></p></div>
+        <div class="t55"><p><%= locals.data.time_period %></p></div>
+        <div class="t55"><p><%= locals.data.startDate %></p></div>
+        <div class="t55"><p><%= locals.data.endDate %></p></div>
+        <div class="t55"><p><%= locals.data.wish %></p></div>
+        <div class="t49"><p><%= locals.approves[0].comment %></p></div>
+        <div class="t50"><img class="signature"src="<%= locals.approves[0].teacher.signature_url %>" alt="1.png" /></div>
+        <div class="t49"><p><%= locals.approves[1].comment %></p></div>
+        <div class="t52"><img class="signature"src="<%= locals.approves[1].teacher.signature_url %>" alt="1.png" /></div>
+        <div class="t49"><p><%= locals.approves[2].comment %></p></div>
+        <div class="t53"><img class="signature"src="<%= locals.approves[2].teacher.signature_url %>" alt="1.png" /></div>
         <div class="header">
             <div class="img-logo">
                 <img src="https://www.img.in.th/images/bf3e5a1ed885f67f38b8abb9decf470e.jpg" alt="logo.jpg" />
@@ -47,7 +476,7 @@
                 </div>
             </div>
             <div class="ro-26">
-                <h3 class="headright">RO-01</h1>
+                <h3 class="headright">RO-16</h1>
             </div>
         </div>
         <!-- LINE -->
