@@ -2,7 +2,7 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "assets": ["trasaction/templates/**/*"],
+    "assets": ["transaction/templates/**/*"],
     "watchAssets": true
   }
 }
