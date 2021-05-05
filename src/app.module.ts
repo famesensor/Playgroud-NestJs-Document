@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { typeOrmConfig } from './config/typeorm.config';
 import { UserModule } from './user/user.module';
-import { TrasactionModule } from './trasaction/trasaction.module';
+import { TrasactionModule } from './transaction/transaction.module';
 import { PDFModule } from '@t00nday/nestjs-pdf';
 
 @Module({
@@ -15,7 +15,7 @@ import { PDFModule } from '@t00nday/nestjs-pdf';
     PDFModule.register({
       isGlobal: true,
       view: {
-        root: __dirname + '/trasaction/templates',
+        root: __dirname + '/transaction/templates',
         engine: 'ejs',
       },
     }),
