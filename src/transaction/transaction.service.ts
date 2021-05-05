@@ -29,7 +29,7 @@ import { addMinutes } from 'src/utils/date';
 import { IEmailOption } from 'src/interfaces/IEmailOption';
 import { IPdfOption } from 'src/interfaces/IPdfOption';
 import { TypeDocument } from './enum/transaction.enum';
-import { PDFService } from '@t00nday/nestjs-pdf';
+import { PDFOptions, PDFService } from '@t00nday/nestjs-pdf';
 
 // TODO: refactor code
 @Injectable()
@@ -63,16 +63,11 @@ export class TrasactionService {
 
     // get teacher list...
     const teachers: User[] = [];
-    const boss = await this.userRepository.findOne({ role: Role.Boss });
-    if (!boss) {
-      throw new NotFoundException(`Dean’s Not Found.`);
-    }
-
     const leader = await this.userRepository.findOne({ role: Role.Leader });
     if (!leader) {
       throw new NotFoundException(`Head of Department Not Found.`);
     }
-    teachers.push(info.advisee.advicer, leader, boss);
+    teachers.push(info.advisee.advicer, leader);
 
     try {
       await this.ro01Repository.createDocumentRO01(
@@ -216,13 +211,13 @@ export class TrasactionService {
   ): Promise<PaginationRes> {
     const { limit, filter_type, sort, order, page } = paginationDto;
     let doc = this.trasactionRepository
-      .createQueryBuilder('trasaction_document')
-      .leftJoinAndSelect('trasaction_document.user', 'user')
+      .createQueryBuilder('transaction_document')
+      .leftJoinAndSelect('transaction_document.user', 'user')
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-      .leftJoinAndSelect('trasaction_document.type', 'type')
-      .leftJoin('trasaction_document.approve', 'approve')
+      .leftJoinAndSelect('transaction_document.type', 'type')
+      .leftJoin('transaction_document.approve', 'approve')
       .where('approve.teacher_id = :id', { id: user.id })
-      .andWhere('trasaction_document.credit = approve.step');
+      .andWhere('transaction_document.credit = approve.step');
 
     // filter type document...
     if (filter_type) {
@@ -250,8 +245,8 @@ export class TrasactionService {
       else doc = doc.addOrderBy(column, 'DESC');
     } else {
       if (order == 'acs')
-        doc = doc.addOrderBy('trasaction_document.create_date', 'ASC');
-      else doc = doc.addOrderBy('trasaction_document.create_date', 'DESC');
+        doc = doc.addOrderBy('transaction_document.create_date', 'ASC');
+      else doc = doc.addOrderBy('transaction_document.create_date', 'DESC');
     }
 
     // limit
@@ -274,15 +269,15 @@ export class TrasactionService {
   // get document...
   async getDocument(id: string): Promise<any> {
     const doc = await this.trasactionRepository
-      .createQueryBuilder('trasaction_document')
-      .leftJoinAndSelect('trasaction_document.user', 'user')
+      .createQueryBuilder('transaction_document')
+      .leftJoinAndSelect('transaction_document.user', 'user')
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-      .leftJoinAndSelect('trasaction_document.type', 'type')
-      .leftJoinAndSelect('trasaction_document.mapping', 'mapping')
+      .leftJoinAndSelect('transaction_document.type', 'type')
+      .leftJoinAndSelect('transaction_document.mapping', 'mapping')
       .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
       .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
       .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
-      .where('trasaction_document.id = :id', {
+      .where('transaction_document.id = :id', {
         id: id,
       })
       .getOne();
@@ -305,12 +300,12 @@ export class TrasactionService {
     const queryRunner = connection.createQueryRunner();
 
     const docRes = await this.trasactionRepository
-      .createQueryBuilder('trasaction_document')
-      .leftJoinAndSelect('trasaction_document.user', 'user')
+      .createQueryBuilder('transaction_document')
+      .leftJoinAndSelect('transaction_document.user', 'user')
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-      .leftJoinAndSelect('trasaction_document.type', 'type')
-      .leftJoinAndSelect('trasaction_document.approve', 'approve')
-      .where('trasaction_document.id = :id', { id })
+      .leftJoinAndSelect('transaction_document.type', 'type')
+      .leftJoinAndSelect('transaction_document.approve', 'approve')
+      .where('transaction_document.id = :id', { id })
       .andWhere(
         'approve.teacherId = :teacher_id AND approve.status = :status',
         {
@@ -386,13 +381,13 @@ export class TrasactionService {
     const queryRunner = connection.createQueryRunner();
 
     const docRes = await this.trasactionRepository
-      .createQueryBuilder('trasaction_document')
-      .leftJoinAndSelect('trasaction_document.user', 'user')
+      .createQueryBuilder('transaction_document')
+      .leftJoinAndSelect('transaction_document.user', 'user')
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-      .leftJoinAndSelect('trasaction_document.type', 'type')
-      .leftJoinAndSelect('trasaction_document.approve', 'approve')
+      .leftJoinAndSelect('transaction_document.type', 'type')
+      .leftJoinAndSelect('transaction_document.approve', 'approve')
       .leftJoinAndSelect('approve.teacher', 'teacher')
-      .where('trasaction_document.id = :id AND approve.status = :status', {
+      .where('transaction_document.id = :id AND approve.status = :status', {
         id,
         status: 'waiting',
       })
@@ -419,16 +414,17 @@ export class TrasactionService {
       template = `/templates/teachmail`;
     }
 
+    let buffer: Buffer;
     if (docRes.approve.length === 1) {
       const info = await this.trasactionRepository
-        .createQueryBuilder('trasaction_document')
-        .leftJoinAndSelect('trasaction_document.approve', 'approve')
-        .leftJoinAndSelect('trasaction_document.mapping', 'mapping')
+        .createQueryBuilder('transaction_document')
+        .leftJoinAndSelect('transaction_document.approve', 'approve')
+        .leftJoinAndSelect('transaction_document.mapping', 'mapping')
         .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
         .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
         .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
         .leftJoinAndSelect('approve.teacher', 'teacher')
-        .where('trasaction_document.id = :id ', { id: id })
+        .where('transaction_document.id = :id ', { id: id })
         .orderBy('approve.step', 'ASC')
         .getOne();
 
@@ -436,17 +432,17 @@ export class TrasactionService {
       let path: string;
       switch (docRes.type.type_name) {
         case TypeDocument.RO01: {
-          path = '/templates/RO01';
+          path = '/RO01';
           doc = info.mapping.documentRO01;
           break;
         }
         case TypeDocument.RO16: {
-          path = '/templates/RO16';
+          path = '/RO16';
           doc = info.mapping.documentRO16;
           break;
         }
         case TypeDocument.RO26: {
-          path = '/templates/RO26';
+          path = '/RO26';
           doc = info.mapping.docuemntRO26;
           break;
         }
@@ -459,54 +455,57 @@ export class TrasactionService {
         approves: info.approve,
       };
 
-      await this.generatePDF(infoPdf);
+      buffer = await this.generatePDF(infoPdf);
     }
 
-    // if (new Date() >= docRes.approve[index].expire_date)
-    //   throw new BadRequestException();
+    if (new Date() >= docRes.approve[index].expire_date)
+      throw new BadRequestException();
 
-    // await queryRunner.startTransaction();
+    await queryRunner.startTransaction();
 
-    // try {
-    //   // update approve...
-    //   await queryRunner.manager.update(
-    //     Approve,
-    //     { id: docRes.approve[0].id },
-    //     { status: 'success', expire_date: null, update_date: new Date() },
-    //   );
+    try {
+      // update approve...
+      await queryRunner.manager.update(
+        Approve,
+        { id: docRes.approve[0].id },
+        { status: 'success', expire_date: null, update_date: new Date() },
+      );
 
-    //   // update trasaction...
-    //   await queryRunner.manager.update(
-    //     TransactionDocument,
-    //     { id: id },
-    //     {
-    //       success: isSuccess,
-    //       credit: () => 'credit + 1',
-    //       update_date: new Date(),
-    //     },
-    //   );
-    //   await queryRunner.commitTransaction();
-
-    //   // send email to teacher
-    //   const option: IEmailOption = {
-    //     to: email,
-    //     subject: subject,
-    //     template: template,
-    //     context: {
-    //       name: docRes.user.name,
-    //       student_id: docRes.user.studentInfo.student_code,
-    //       type_name: docRes.type.type_name,
-    //       file: null,
-    //     },
-    //   };
-    //   await this.sendEmail(option);
-    // } catch (error) {
-    //   console.log(error);
-    //   await queryRunner.rollbackTransaction();
-    //   throw new InternalServerErrorException();
-    // } finally {
-    //   await queryRunner.release();
-    // }
+      // update trasaction...
+      await queryRunner.manager.update(
+        TransactionDocument,
+        { id: id },
+        {
+          success: isSuccess,
+          credit: () => 'credit + 1',
+          update_date: new Date(),
+        },
+      );
+      await queryRunner.commitTransaction();
+      console.log(buffer);
+      // send email to teacher
+      const option: IEmailOption = {
+        to: email,
+        subject: subject,
+        template: template,
+        context: {
+          name: docRes.user.name,
+          student_id: docRes.user.studentInfo.student_code,
+          type_name: docRes.type.type_name,
+          file: {
+            file_name: `${docRes.type.type_name}-${docRes.user.name}.pdf`,
+            content: buffer,
+          },
+        },
+      };
+      await this.sendEmail(option);
+    } catch (error) {
+      console.log(error);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
+    }
 
     return { status: true, message: 'success' };
   }
@@ -525,7 +524,13 @@ export class TrasactionService {
           file: option.context.file,
           validate_url: option.context.validate_url,
         },
-        attachments: [{ filename: '', contentType: '' }],
+        attachments: [
+          {
+            filename: option.context.file.file_name,
+            contentType: 'application/pdf',
+            content: option.context.file.content,
+          },
+        ],
       });
     } catch (error) {
       console.log(error);
@@ -535,14 +540,17 @@ export class TrasactionService {
 
   // generate pdf...
   private async generatePDF(option: IPdfOption): Promise<any> {
-    const buffer = this.pdfService.toFile('/RO01', 'filename.pdf', {
+    const op: PDFOptions = {
       locals: {
         student: option.student,
         approves: option.approves,
         data: option.data,
       },
-    });
-    console.log((await buffer.toPromise()).filename);
-    return;
+    };
+    const buffer = await this.pdfService
+      .toBuffer(option.template, op)
+      .toPromise();
+
+    return buffer;
   }
 }
