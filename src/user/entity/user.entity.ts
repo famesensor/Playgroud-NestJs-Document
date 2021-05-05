@@ -12,8 +12,8 @@ import {
 import * as bcrypt from 'bcrypt';
 import { StudentInfo } from './student.entity';
 import { AdvicerAdvisee } from './advicer.entity';
-import { TransactionDocument } from 'src/trasaction/entity/trasaction.entity';
-import { Approve } from 'src/trasaction/entity/approve.entity';
+import { TransactionDocument } from 'src/transaction/entity/transaction.entity';
+import { Approve } from 'src/transaction/entity/approve.entity';
 
 @Entity()
 @Unique(['username', 'email'])

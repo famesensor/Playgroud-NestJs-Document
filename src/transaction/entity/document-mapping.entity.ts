@@ -30,7 +30,7 @@ export class MappingDocument extends BaseEntity {
   @JoinColumn()
   docuemntRO26: DocumentRO26;
 
-  @OneToOne(() => TransactionDocument, (trasaction) => trasaction.mapping)
+  @OneToOne(() => TransactionDocument, (transaction) => transaction.mapping)
   @JoinColumn()
   transaction: TransactionDocument;
 
