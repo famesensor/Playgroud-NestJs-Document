@@ -7,11 +7,11 @@ import { RO01Repository } from './document-ro01.repository';
 import { RO16Repository } from './document-ro16.repository';
 import { RO26Repository } from './document-ro26.repository';
 import { DocumentType } from './entity/document-type.entity';
-import { TrasactionController } from './trasaction.controller';
-import { TrasactionService } from './trasaction.service';
+import { TrasactionController } from './transaction.controller';
+import { TrasactionService } from './transaction.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { mailConfig } from 'src/config/mailer.config';
-import { TransactionDocument } from './entity/trasaction.entity';
+import { TransactionDocument } from './entity/transaction.entity';
 import { Approve } from './entity/approve.entity';
 
 @Module({

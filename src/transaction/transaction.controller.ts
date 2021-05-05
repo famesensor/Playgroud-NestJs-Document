@@ -17,7 +17,7 @@ import { User } from 'src/user/entity/user.entity';
 import { RO01Dto } from './dto/create-ro01.dto';
 import { RO16Dto } from './dto/create-ro16.dto';
 import { RO26Dto } from './dto/create-ro26.dto';
-import { TrasactionService } from './trasaction.service';
+import { TrasactionService } from './transaction.service';
 import { CourseTypeValidationPipe } from './pipe/course-status-validation.pipe';
 import { PaginationDto } from 'src/shared/dto/pagination/pagination.dto';
 import { CommentDto } from './dto/create-comment.dto';

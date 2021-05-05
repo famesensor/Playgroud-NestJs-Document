@@ -33,7 +33,7 @@ export class TransactionDocument extends BaseEntity {
   @JoinColumn()
   approve: Approve[];
 
-  @OneToOne(() => MappingDocument, (mapping) => mapping.trasaction, {
+  @OneToOne(() => MappingDocument, (mapping) => mapping.transaction, {
     cascade: true,
   })
   mapping: MappingDocument;

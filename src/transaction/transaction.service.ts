@@ -22,12 +22,16 @@ import {
   PaginationDto,
   PaginationRes,
 } from 'src/shared/dto/pagination/pagination.dto';
-import { TransactionDocument } from './entity/trasaction.entity';
+import { TransactionDocument } from './entity/transaction.entity';
 import { CommentDto } from './dto/create-comment.dto';
 import { Approve } from './entity/approve.entity';
 import { addMinutes } from 'src/utils/date';
 import { IEmailOption } from 'src/interfaces/IEmailOption';
+import { IPdfOption } from 'src/interfaces/IPdfOption';
+import { TypeDocument } from './enum/transaction.enum';
+import { PDFService } from '@t00nday/nestjs-pdf';
 
+// TODO: refactor code
 @Injectable()
 export class TrasactionService {
   constructor(
@@ -41,6 +45,7 @@ export class TrasactionService {
     private trasactionRepository: Repository<TransactionDocument>,
     @InjectRepository(Approve) private approveRepository: Repository<Approve>,
     private mailerService: MailerService,
+    private readonly pdfService: PDFService,
   ) {}
 
   // create document ro01...
@@ -307,7 +312,7 @@ export class TrasactionService {
       .leftJoinAndSelect('trasaction_document.approve', 'approve')
       .where('trasaction_document.id = :id', { id })
       .andWhere(
-        'approve.teacher_id = :teacher_id AND approve.status = :status',
+        'approve.teacherId = :teacher_id AND approve.status = :status',
         {
           teacher_id: userId,
           status: 'waiting',
@@ -320,7 +325,7 @@ export class TrasactionService {
     if (docRes.success) throw new BadRequestException();
 
     if (docRes.credit !== docRes.approve[0].step)
-      throw new BadRequestException();
+      throw new ForbiddenException();
 
     const teacher = await this.userRepository.getUserDetail(userId);
     if (!teacher) throw new NotFoundException(`Teacher Not Found.`);
@@ -386,6 +391,7 @@ export class TrasactionService {
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
       .leftJoinAndSelect('trasaction_document.type', 'type')
       .leftJoinAndSelect('trasaction_document.approve', 'approve')
+      .leftJoinAndSelect('approve.teacher', 'teacher')
       .where('trasaction_document.id = :id AND approve.status = :status', {
         id,
         status: 'waiting',
@@ -398,71 +404,109 @@ export class TrasactionService {
     const index = docRes.approve.findIndex((item) => {
       return item.id === approveId && item.step === docRes.credit;
     });
-    if (!docRes.approve[index]) throw new BadRequestException();
+    if (!docRes.approve[index]) throw new ForbiddenException();
 
-    let isSuccess = false;
-    let email = '';
-    let subject = '';
-    let template = '';
-    if (docRes.approve.length === 1) {
-      isSuccess = true;
-      email = docRes.user.email;
-      subject = `คำร้องขอ ${docRes.type.type_name} ของนักศึกษาได้รับการตอบร้อบแล้ว`;
-      template = `/templates/student`;
-    } else {
-      // get email teacher...
-      const teacher = await this.userRepository.findOne({
-        id: docRes.approve[index + 1].teacher_id,
-      });
+    let isSuccess = true;
+    let email = docRes.user.email;
+    let subject = `คำร้องขอ ${docRes.type.type_name} ของนักศึกษาได้รับการตอบร้อบแล้ว`;
+    let template = `/templates/student`;
+    if (docRes.approve.length !== 1) {
+      const teacher = docRes.approve[index + 1].teacher;
+      isSuccess = false;
+
       email = teacher.email;
       subject = `ท่านมีคำร้องขอ ${docRes.type.type_name} ที่รอการตอบรับ`;
       template = `/templates/teachmail`;
     }
 
-    if (new Date() >= docRes.approve[index].expire_date)
-      throw new BadRequestException();
+    if (docRes.approve.length === 1) {
+      const info = await this.trasactionRepository
+        .createQueryBuilder('trasaction_document')
+        .leftJoinAndSelect('trasaction_document.approve', 'approve')
+        .leftJoinAndSelect('trasaction_document.mapping', 'mapping')
+        .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
+        .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
+        .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
+        .leftJoinAndSelect('approve.teacher', 'teacher')
+        .where('trasaction_document.id = :id ', { id: id })
+        .orderBy('approve.step', 'ASC')
+        .getOne();
 
-    await queryRunner.startTransaction();
+      let doc: any;
+      let path: string;
+      switch (docRes.type.type_name) {
+        case TypeDocument.RO01: {
+          path = '/templates/RO01';
+          doc = info.mapping.documentRO01;
+          break;
+        }
+        case TypeDocument.RO16: {
+          path = '/templates/RO16';
+          doc = info.mapping.documentRO16;
+          break;
+        }
+        case TypeDocument.RO26: {
+          path = '/templates/RO26';
+          doc = info.mapping.docuemntRO26;
+          break;
+        }
+      }
 
-    try {
-      // update approve...
-      await queryRunner.manager.update(
-        Approve,
-        { id: docRes.approve[0].id },
-        { status: 'success', expire_date: null, update_date: new Date() },
-      );
-
-      // update trasaction...
-      await queryRunner.manager.update(
-        TransactionDocument,
-        { id: id },
-        {
-          success: isSuccess,
-          credit: () => 'credit + 1',
-          update_date: new Date(),
-        },
-      );
-
-      // send email to teacher
-      const option: IEmailOption = {
-        to: email,
-        subject: subject,
-        template: template,
-        context: {
-          name: docRes.user.name,
-          student_id: docRes.user.studentInfo.student_code,
-          type_name: docRes.type.type_name,
-          file: null,
-        },
+      const infoPdf: IPdfOption = {
+        template: path,
+        student: docRes.user,
+        data: doc,
+        approves: info.approve,
       };
-      await this.sendEmail(option);
-    } catch (error) {
-      console.log(error);
-      await queryRunner.rollbackTransaction();
-      throw new InternalServerErrorException();
-    } finally {
-      await queryRunner.release();
+
+      await this.generatePDF(infoPdf);
     }
+
+    // if (new Date() >= docRes.approve[index].expire_date)
+    //   throw new BadRequestException();
+
+    // await queryRunner.startTransaction();
+
+    // try {
+    //   // update approve...
+    //   await queryRunner.manager.update(
+    //     Approve,
+    //     { id: docRes.approve[0].id },
+    //     { status: 'success', expire_date: null, update_date: new Date() },
+    //   );
+
+    //   // update trasaction...
+    //   await queryRunner.manager.update(
+    //     TransactionDocument,
+    //     { id: id },
+    //     {
+    //       success: isSuccess,
+    //       credit: () => 'credit + 1',
+    //       update_date: new Date(),
+    //     },
+    //   );
+    //   await queryRunner.commitTransaction();
+
+    //   // send email to teacher
+    //   const option: IEmailOption = {
+    //     to: email,
+    //     subject: subject,
+    //     template: template,
+    //     context: {
+    //       name: docRes.user.name,
+    //       student_id: docRes.user.studentInfo.student_code,
+    //       type_name: docRes.type.type_name,
+    //       file: null,
+    //     },
+    //   };
+    //   await this.sendEmail(option);
+    // } catch (error) {
+    //   console.log(error);
+    //   await queryRunner.rollbackTransaction();
+    //   throw new InternalServerErrorException();
+    // } finally {
+    //   await queryRunner.release();
+    // }
 
     return { status: true, message: 'success' };
   }
@@ -481,10 +525,24 @@ export class TrasactionService {
           file: option.context.file,
           validate_url: option.context.validate_url,
         },
+        attachments: [{ filename: '', contentType: '' }],
       });
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException();
     }
+  }
+
+  // generate pdf...
+  private async generatePDF(option: IPdfOption): Promise<any> {
+    const buffer = this.pdfService.toFile('/RO01', 'filename.pdf', {
+      locals: {
+        student: option.student,
+        approves: option.approves,
+        data: option.data,
+      },
+    });
+    console.log((await buffer.toPromise()).filename);
+    return;
   }
 }

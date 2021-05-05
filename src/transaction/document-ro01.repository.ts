@@ -1,64 +1,50 @@
-import { InternalServerErrorException } from '@nestjs/common';
 import { User } from 'src/user/entity/user.entity';
-import { UUIDGen } from 'src/utils/uuid';
 import { EntityRepository, getConnection, Repository } from 'typeorm';
-import { RO16Dto } from './dto/create-ro16.dto';
-import { Approve, PREFIX_APPROVE } from './entity/approve.entity';
+import {
+  DocumentRO01,
+  PREFIX_RO01,
+} from '../transaction/entity/document-ro01.entity';
+import { RO01Dto } from './dto/create-ro01.dto';
+import { v4 as uuidv4 } from 'uuid';
 import {
   MappingDocument,
   PREFIX_MAPPING,
 } from './entity/document-mapping.entity';
-import { DocumentRO16, PREFIX_RO16 } from './entity/document-ro16.entity';
-import { DocumentType } from './entity/document-type.entity';
 import {
   PREFIX_TRASACTION,
   TransactionDocument,
-} from './entity/trasaction.entity';
+} from './entity/transaction.entity';
+import { DocumentType } from './entity/document-type.entity';
+import { Approve, PREFIX_APPROVE } from './entity/approve.entity';
+import { InternalServerErrorException } from '@nestjs/common';
 
-@EntityRepository(DocumentRO16)
-export class RO16Repository extends Repository<DocumentRO16> {
-  async createDocumentRO16(
-    ro16Dto: RO16Dto,
+// TODO: add trasaction for insert data
+@EntityRepository(DocumentRO01)
+export class RO01Repository extends Repository<DocumentRO01> {
+  async createDocumentRO01(
+    ro01Dto: RO01Dto,
     user: User,
     typeDoc: DocumentType,
     teachers: Array<User>,
   ): Promise<any> {
-    const {
-      to_name,
-      attach_one,
-      attach_two,
-      wish,
-      time_period,
-      start_date,
-      end_date,
-    } = ro16Dto;
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
 
-    // document...
-    const roDoc = new DocumentRO16();
-    roDoc.id = UUIDGen(PREFIX_RO16);
-    roDoc.attach_one = attach_one;
-    roDoc.attach_two = attach_two;
+    const { title, to_name, reason } = ro01Dto;
+
+    // Document ro01...
+    const roDoc = new DocumentRO01();
+    roDoc.id = `${PREFIX_RO01}${uuidv4()}`;
+    roDoc.title = title;
     roDoc.to_name = to_name;
-    roDoc.wish = wish;
-    roDoc.time_period = time_period;
-    roDoc.startDate = new Date(start_date);
-    roDoc.endDate = new Date(end_date);
+    roDoc.reason = reason;
     roDoc.createBy = user.id;
     roDoc.create_date = new Date();
     roDoc.update_date = new Date();
 
-    // mapping...
-    const map = new MappingDocument();
-    map.id = UUIDGen(PREFIX_MAPPING);
-    map.documentRO16 = roDoc;
-    map.create_date = new Date();
-    map.update_date = new Date();
-
     // transaction...
     const trasaction = new TransactionDocument();
-    trasaction.id = UUIDGen(PREFIX_TRASACTION);
+    trasaction.id = `${PREFIX_TRASACTION}${uuidv4()}`;
     trasaction.credit = 1;
     trasaction.type = typeDoc;
     trasaction.user = user;
@@ -66,17 +52,25 @@ export class RO16Repository extends Repository<DocumentRO16> {
     trasaction.create_date = new Date();
     trasaction.update_date = new Date();
 
+    // map document..
+    const map = new MappingDocument();
+    map.id = `${PREFIX_MAPPING}${uuidv4()}`;
+    map.documentRO01 = roDoc;
+    map.create_date = new Date();
+    map.update_date = new Date();
+
+    // // approve...
     const approvies: Array<Approve> = [];
     let index = 1;
     for (const teacher of teachers) {
       const approve = new Approve();
-      approve.id = UUIDGen(PREFIX_APPROVE);
+      approve.id = `${PREFIX_APPROVE}${uuidv4()}`;
       approve.status = `waiting`;
       approve.comment = '';
       approve.step = index;
       approve.teacher = teacher;
       approve.transaction = trasaction;
-      // approve.exprieDate = null;
+      // approve.exprieDate = new Date();
       approve.create_date = new Date();
       approve.update_date = new Date();
       approvies.push(approve);

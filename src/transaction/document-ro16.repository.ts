@@ -2,60 +2,57 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { User } from 'src/user/entity/user.entity';
 import { UUIDGen } from 'src/utils/uuid';
 import { EntityRepository, getConnection, Repository } from 'typeorm';
-import { SubjectDto } from './dto/create-ro26.dto';
+import { RO16Dto } from './dto/create-ro16.dto';
 import { Approve, PREFIX_APPROVE } from './entity/approve.entity';
 import {
   MappingDocument,
   PREFIX_MAPPING,
 } from './entity/document-mapping.entity';
-import { DocumentRO26, PREFIX_RO26 } from './entity/document-ro26.entity';
+import { DocumentRO16, PREFIX_RO16 } from './entity/document-ro16.entity';
 import { DocumentType } from './entity/document-type.entity';
-import { PREFIX_COURSE, RO26Course } from './entity/ro26-course.entity';
 import {
   PREFIX_TRASACTION,
   TransactionDocument,
-} from './entity/trasaction.entity';
+} from './entity/transaction.entity';
 
-@EntityRepository(DocumentRO26)
-export class RO26Repository extends Repository<DocumentRO26> {
+@EntityRepository(DocumentRO16)
+export class RO16Repository extends Repository<DocumentRO16> {
   async createDocumentRO16(
-    subject: SubjectDto[],
+    ro16Dto: RO16Dto,
     user: User,
     typeDoc: DocumentType,
     teachers: Array<User>,
   ): Promise<any> {
+    const {
+      to_name,
+      attach_one,
+      attach_two,
+      wish,
+      time_period,
+      start_date,
+      end_date,
+    } = ro16Dto;
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
 
     // document...
-    const roDoc = new DocumentRO26();
-    roDoc.id = UUIDGen(PREFIX_RO26);
+    const roDoc = new DocumentRO16();
+    roDoc.id = UUIDGen(PREFIX_RO16);
+    roDoc.attach_one = attach_one;
+    roDoc.attach_two = attach_two;
+    roDoc.to_name = to_name;
+    roDoc.wish = wish;
+    roDoc.time_period = time_period;
+    roDoc.startDate = new Date(start_date);
+    roDoc.endDate = new Date(end_date);
     roDoc.createBy = user.id;
     roDoc.create_date = new Date();
     roDoc.update_date = new Date();
 
-    // course...
-    const courseDoc: Array<RO26Course> = [];
-    subject.forEach((item) => {
-      const doc = new RO26Course();
-      doc.id = UUIDGen(PREFIX_COURSE);
-      doc.course_code = item.course_code;
-      doc.group_number = item.group_number;
-      doc.credit = item.credit;
-      doc.type = item.type;
-      doc.createBy = user.id;
-      doc.create_date = new Date();
-      doc.update_date = new Date();
-
-      courseDoc.push(doc);
-    });
-
-    roDoc.ro26course = courseDoc;
-
     // mapping...
     const map = new MappingDocument();
     map.id = UUIDGen(PREFIX_MAPPING);
-    map.docuemntRO26 = roDoc;
+    map.documentRO16 = roDoc;
     map.create_date = new Date();
     map.update_date = new Date();
 

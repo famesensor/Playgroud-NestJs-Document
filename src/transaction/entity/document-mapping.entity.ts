@@ -10,7 +10,7 @@ import {
 import { DocumentRO16 } from './document-ro16.entity';
 import { DocumentRO26 } from './document-ro26.entity';
 import { DocumentRO01 } from './document-ro01.entity';
-import { TransactionDocument } from './trasaction.entity';
+import { TransactionDocument } from './transaction.entity';
 
 export const PREFIX_MAPPING = `mapping_document_`;
 @Entity()
@@ -32,7 +32,7 @@ export class MappingDocument extends BaseEntity {
 
   @OneToOne(() => TransactionDocument, (trasaction) => trasaction.mapping)
   @JoinColumn()
-  trasaction: TransactionDocument;
+  transaction: TransactionDocument;
 
   @CreateDateColumn({ type: 'timestamptz' })
   create_date: Date;

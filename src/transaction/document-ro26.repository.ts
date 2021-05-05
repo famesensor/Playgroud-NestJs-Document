@@ -1,28 +1,25 @@
+import { InternalServerErrorException } from '@nestjs/common';
 import { User } from 'src/user/entity/user.entity';
+import { UUIDGen } from 'src/utils/uuid';
 import { EntityRepository, getConnection, Repository } from 'typeorm';
-import {
-  DocumentRO01,
-  PREFIX_RO01,
-} from '../trasaction/entity/document-ro01.entity';
-import { RO01Dto } from './dto/create-ro01.dto';
-import { v4 as uuidv4 } from 'uuid';
+import { SubjectDto } from './dto/create-ro26.dto';
+import { Approve, PREFIX_APPROVE } from './entity/approve.entity';
 import {
   MappingDocument,
   PREFIX_MAPPING,
 } from './entity/document-mapping.entity';
+import { DocumentRO26, PREFIX_RO26 } from './entity/document-ro26.entity';
+import { DocumentType } from './entity/document-type.entity';
+import { PREFIX_COURSE, RO26Course } from './entity/ro26-course.entity';
 import {
   PREFIX_TRASACTION,
   TransactionDocument,
-} from './entity/trasaction.entity';
-import { DocumentType } from './entity/document-type.entity';
-import { Approve, PREFIX_APPROVE } from './entity/approve.entity';
-import { InternalServerErrorException } from '@nestjs/common';
+} from './entity/transaction.entity';
 
-// TODO: add trasaction for insert data
-@EntityRepository(DocumentRO01)
-export class RO01Repository extends Repository<DocumentRO01> {
-  async createDocumentRO01(
-    ro01Dto: RO01Dto,
+@EntityRepository(DocumentRO26)
+export class RO26Repository extends Repository<DocumentRO26> {
+  async createDocumentRO16(
+    subject: SubjectDto[],
     user: User,
     typeDoc: DocumentType,
     teachers: Array<User>,
@@ -30,21 +27,41 @@ export class RO01Repository extends Repository<DocumentRO01> {
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
 
-    const { title, to_name, reason } = ro01Dto;
-
-    // Document ro01...
-    const roDoc = new DocumentRO01();
-    roDoc.id = `${PREFIX_RO01}${uuidv4()}`;
-    roDoc.title = title;
-    roDoc.to_name = to_name;
-    roDoc.reason = reason;
+    // document...
+    const roDoc = new DocumentRO26();
+    roDoc.id = UUIDGen(PREFIX_RO26);
     roDoc.createBy = user.id;
     roDoc.create_date = new Date();
     roDoc.update_date = new Date();
 
+    // course...
+    const courseDoc: Array<RO26Course> = [];
+    subject.forEach((item) => {
+      const doc = new RO26Course();
+      doc.id = UUIDGen(PREFIX_COURSE);
+      doc.course_code = item.course_code;
+      doc.group_number = item.group_number;
+      doc.credit = item.credit;
+      doc.type = item.type;
+      doc.createBy = user.id;
+      doc.create_date = new Date();
+      doc.update_date = new Date();
+
+      courseDoc.push(doc);
+    });
+
+    roDoc.ro26course = courseDoc;
+
+    // mapping...
+    const map = new MappingDocument();
+    map.id = UUIDGen(PREFIX_MAPPING);
+    map.docuemntRO26 = roDoc;
+    map.create_date = new Date();
+    map.update_date = new Date();
+
     // transaction...
     const trasaction = new TransactionDocument();
-    trasaction.id = `${PREFIX_TRASACTION}${uuidv4()}`;
+    trasaction.id = UUIDGen(PREFIX_TRASACTION);
     trasaction.credit = 1;
     trasaction.type = typeDoc;
     trasaction.user = user;
@@ -52,25 +69,17 @@ export class RO01Repository extends Repository<DocumentRO01> {
     trasaction.create_date = new Date();
     trasaction.update_date = new Date();
 
-    // map document..
-    const map = new MappingDocument();
-    map.id = `${PREFIX_MAPPING}${uuidv4()}`;
-    map.documentRO01 = roDoc;
-    map.create_date = new Date();
-    map.update_date = new Date();
-
-    // // approve...
     const approvies: Array<Approve> = [];
     let index = 1;
     for (const teacher of teachers) {
       const approve = new Approve();
-      approve.id = `${PREFIX_APPROVE}${uuidv4()}`;
+      approve.id = UUIDGen(PREFIX_APPROVE);
       approve.status = `waiting`;
       approve.comment = '';
       approve.step = index;
       approve.teacher = teacher;
       approve.transaction = trasaction;
-      // approve.exprieDate = new Date();
+      // approve.exprieDate = null;
       approve.create_date = new Date();
       approve.update_date = new Date();
       approvies.push(approve);

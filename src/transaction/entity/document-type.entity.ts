@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { TransactionDocument } from './trasaction.entity';
+import { TransactionDocument } from './transaction.entity';
 
 @Entity()
 export class DocumentType extends BaseEntity {
