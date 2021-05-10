@@ -18,7 +18,6 @@ import { DocumentType } from './entity/document-type.entity';
 import { Approve, PREFIX_APPROVE } from './entity/approve.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 
-// TODO: add trasaction for insert data
 @EntityRepository(DocumentRO01)
 export class RO01Repository extends Repository<DocumentRO01> {
   async createDocumentRO01(
