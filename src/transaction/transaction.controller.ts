@@ -22,6 +22,7 @@ import { CourseTypeValidationPipe } from './pipe/course-status-validation.pipe';
 import { PaginationDto } from 'src/shared/dto/pagination/pagination.dto';
 import { CommentDto } from './dto/create-comment.dto';
 
+// TODO: change response all...
 @Controller('trasaction')
 export class TrasactionController {
   constructor(private trasactionService: TrasactionService) {}
@@ -84,5 +85,13 @@ export class TrasactionController {
     @Param('approve_id') approveId: string,
   ) {
     return this.trasactionService.confirmApprove(id, approveId);
+  }
+
+  // TODO: set download document file from server
+  @Roles(Role.Student)
+  @UseGuards(AuthGuard(), RolesGuard)
+  @Get('/:id/download-document')
+  downloadDocument(@Param('id') id: string) {
+    return null;
   }
 }
