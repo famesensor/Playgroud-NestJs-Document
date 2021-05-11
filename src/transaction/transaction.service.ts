@@ -28,10 +28,11 @@ import { Approve } from './entity/approve.entity';
 import { addMinutes } from 'src/utils/date';
 import { IEmailOption } from 'src/interfaces/IEmailOption';
 import { IPdfOption } from 'src/interfaces/IPdfOption';
-import { TypeDocument } from './enum/transaction.enum';
-import { PDFOptions, PDFService } from '@t00nday/nestjs-pdf';
+import { CourseStatus, TypeDocument } from './enum/transaction.enum';
+import { compile } from 'ejs';
+import { create } from 'html-pdf';
+import { readFileSync } from 'node:fs';
 
-// TODO: refactor code
 @Injectable()
 export class TrasactionService {
   constructor(
@@ -45,7 +46,6 @@ export class TrasactionService {
     private trasactionRepository: Repository<TransactionDocument>,
     @InjectRepository(Approve) private approveRepository: Repository<Approve>,
     private mailerService: MailerService,
-    private readonly pdfService: PDFService,
   ) {}
 
   // create document ro01...
@@ -130,7 +130,6 @@ export class TrasactionService {
           name: info.name,
           student_id: info.studentInfo.student_code,
           type_name: typeInfo.type_name,
-          file: null,
         },
       };
       await this.sendEmail(option);
@@ -152,16 +151,11 @@ export class TrasactionService {
 
     // get teacher list...
     const teachers: User[] = [];
-    const boss = await this.userRepository.findOne({ role: Role.Boss });
-    if (!boss) {
-      throw new NotFoundException(`Dean’s Not Found.`);
-    }
-
     const leader = await this.userRepository.findOne({ role: Role.Leader });
     if (!leader) {
       throw new NotFoundException(`Head of Department Not Found.`);
     }
-    teachers.push(info.advisee.advicer, leader, boss);
+    teachers.push(info.advisee.advicer, leader);
 
     try {
       await this.re26Repository.createDocumentRO16(
@@ -180,7 +174,6 @@ export class TrasactionService {
           name: info.name,
           student_id: info.studentInfo.student_code,
           type_name: typeInfo.type_name,
-          file: null,
         },
       };
       await this.sendEmail(option);
@@ -392,57 +385,13 @@ export class TrasactionService {
     let email = docRes.user.email;
     let subject = `คำร้องขอ ${docRes.type.type_name} ของนักศึกษาได้รับการตอบร้อบแล้ว`;
     let template = `/templates/student`;
+    const pdfLink = `http://localhost:3000/api/trasaction/${id}/download-document`;
     if (docRes.approve.length !== 1) {
       const teacher = docRes.approve[index + 1].teacher;
       isSuccess = false;
-
       email = teacher.email;
       subject = `ท่านมีคำร้องขอ ${docRes.type.type_name} ที่รอการตอบรับ`;
       template = `/templates/teachmail`;
-    }
-
-    let buffer: Buffer;
-    if (docRes.approve.length === 1) {
-      const info = await this.trasactionRepository
-        .createQueryBuilder('transaction_document')
-        .leftJoinAndSelect('transaction_document.approve', 'approve')
-        .leftJoinAndSelect('transaction_document.mapping', 'mapping')
-        .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
-        .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
-        .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
-        .leftJoinAndSelect('approve.teacher', 'teacher')
-        .where('transaction_document.id = :id ', { id: id })
-        .orderBy('approve.step', 'ASC')
-        .getOne();
-
-      let doc: any;
-      let path: string;
-      switch (docRes.type.type_name) {
-        case TypeDocument.RO01: {
-          path = '/RO01';
-          doc = info.mapping.documentRO01;
-          break;
-        }
-        case TypeDocument.RO16: {
-          path = '/RO16';
-          doc = info.mapping.documentRO16;
-          break;
-        }
-        case TypeDocument.RO26: {
-          path = '/RO26';
-          doc = info.mapping.docuemntRO26;
-          break;
-        }
-      }
-
-      const infoPdf: IPdfOption = {
-        template: path,
-        student: docRes.user,
-        data: doc,
-        approves: info.approve,
-      };
-
-      buffer = await this.generatePDF(infoPdf);
     }
 
     if (new Date() >= docRes.approve[index].expire_date)
@@ -479,10 +428,7 @@ export class TrasactionService {
           name: docRes.user.name,
           student_id: docRes.user.studentInfo.student_code,
           type_name: docRes.type.type_name,
-          file: {
-            file_name: `${docRes.type.type_name}-${docRes.user.name}.pdf`,
-            content: buffer,
-          },
+          pdf_link: pdfLink,
         },
       };
       await this.sendEmail(option);
@@ -493,8 +439,72 @@ export class TrasactionService {
     } finally {
       await queryRunner.release();
     }
-
+    // return;
     return { status: true, message: 'success' };
+  }
+
+  async downloadDocument(id: string): Promise<Buffer> {
+    const info = await this.trasactionRepository
+      .createQueryBuilder('transaction_document')
+      .leftJoinAndSelect('transaction_document.user', 'user')
+      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('transaction_document.type', 'type')
+      .leftJoinAndSelect('transaction_document.approve', 'approve')
+      .leftJoinAndSelect('transaction_document.mapping', 'mapping')
+      .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
+      .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
+      .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
+      .leftJoinAndSelect('docuemntRO26.ro26course', 'ro26course')
+      .leftJoinAndSelect('approve.teacher', 'teacher')
+      .where('transaction_document.id = :id ', { id: id })
+      .orderBy('approve.step', 'ASC')
+      .getOne();
+
+    if (!info) throw new NotFoundException('Document Not Found');
+
+    let doc: any;
+    let path: string;
+    switch (info.type.type_name) {
+      case TypeDocument.RO01: {
+        path = '/RO01';
+        doc = info.mapping.documentRO01;
+        break;
+      }
+      case TypeDocument.RO16: {
+        path = '/RO16';
+        doc = info.mapping.documentRO16;
+        break;
+      }
+      case TypeDocument.RO26: {
+        path = '/RO26';
+        doc = {
+          ADDSUBJECT: info.mapping.docuemntRO26.ro26course.filter(
+            (i) => i.type === CourseStatus.ADD_SUBJECT,
+          ),
+          WITHDRAWAL: info.mapping.docuemntRO26.ro26course.filter(
+            (i) => i.type === CourseStatus.ADD_SUBJECT,
+          ),
+          CHANGESECTION: info.mapping.docuemntRO26.ro26course.filter(
+            (i) => i.type === CourseStatus.ADD_SUBJECT,
+          ),
+        };
+        break;
+      }
+    }
+    const infoPdf: IPdfOption = {
+      template: path,
+      student: info.user,
+      data: doc,
+      approves: info.approve,
+    };
+
+    try {
+      const buffer = await this.generatePDF(infoPdf);
+      return buffer;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
   }
 
   // get type document...
@@ -512,16 +522,6 @@ export class TrasactionService {
 
   // send email to ...
   private async sendEmail(option: IEmailOption): Promise<any> {
-    let attachment;
-    if (option.context.file) {
-      attachment = [
-        {
-          filename: option.context.file.file_name,
-          contentType: 'application/pdf',
-          content: option.context.file.content,
-        },
-      ];
-    }
     try {
       return await this.mailerService.sendMail({
         to: option.to,
@@ -531,10 +531,9 @@ export class TrasactionService {
           name: option.context.name,
           student_id: option.context.student_id,
           type_name: option.context.type_name,
-          file: option.context.file,
           validate_url: option.context.validate_url,
+          pdf_link: option.context.pdf_link,
         },
-        attachments: attachment,
       });
     } catch (error) {
       console.log(error);
@@ -543,18 +542,30 @@ export class TrasactionService {
   }
 
   // generate pdf...
-  private async generatePDF(option: IPdfOption): Promise<any> {
-    const op: PDFOptions = {
-      locals: {
-        student: option.student,
-        approves: option.approves,
-        data: option.data,
-      },
-    };
-    const buffer = await this.pdfService
-      .toBuffer(option.template, op)
-      .toPromise();
+  private async generatePDF(option: IPdfOption): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const complieFile = compile(
+        readFileSync(
+          __dirname + `/templates/${option.template}/html.ejs`,
+          'utf-8',
+        ),
+      );
 
-    return buffer;
+      const complieContent = complieFile({
+        student: option.student,
+        data: option.data,
+        approves: option.approves,
+      });
+
+      create(complieContent, {
+        format: 'A4',
+      }).toBuffer((err, res) => {
+        if (err) {
+          reject(reject);
+        } else {
+          resolve(res);
+        }
+      });
+    });
   }
 }
