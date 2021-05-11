@@ -2,10 +2,12 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Param,
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -21,6 +23,7 @@ import { TrasactionService } from './transaction.service';
 import { CourseTypeValidationPipe } from './pipe/course-status-validation.pipe';
 import { PaginationDto } from 'src/shared/dto/pagination/pagination.dto';
 import { CommentDto } from './dto/create-comment.dto';
+import { Response } from 'express';
 
 // TODO: change response all...
 @Controller('trasaction')
@@ -87,11 +90,11 @@ export class TrasactionController {
     return this.trasactionService.confirmApprove(id, approveId);
   }
 
-  // TODO: set download document file from server
-  @Roles(Role.Student)
-  @UseGuards(AuthGuard(), RolesGuard)
   @Get('/:id/download-document')
-  downloadDocument(@Param('id') id: string) {
-    return null;
+  @Header('Content-type', 'application/pdf')
+  async downloadDocument(@Res() res: Response, @Param('id') id: string) {
+    const pdf = await this.trasactionService.downloadDocument(id);
+    res.header('Content-type', 'application/pdf');
+    res.send(pdf);
   }
 }
