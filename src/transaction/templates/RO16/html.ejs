@@ -476,32 +476,32 @@ hr {
 <title> RO16</title>
 <body>
     <div class="p1">
-        <div class="t1"><p>1</p></div>
-        <div class="t2"><p>2553</p></div>
-        <div class="t54"><p>ขอลากิจ</p></div>
-        <div class="t55"><p>อาจารย์ประจำวิชา CSS111</p></div>
-        <div class="isus"><p>file 2</p></div>
-        <div class="t3"><p>รัตนา จงพิศาลพัฒนา</p></div>
-        <div class="t4"><p>60090500445</p></div>
-        <div class="t5"><p>คณะวิทยาศาสตร์</p></div>
-        <div class="t6"><p>วิทยาการคอมพิวเตอร์ประยุกต์</p></div>
-        <div class="t7"><p>ปริญญาตรี</p></div>
-        <div class="t8"><p>2.98</p></div>
-        <div class="t9"><p>4</p></div>
+        <div class="t1"><p><%= student.studentInfo.semeter %></p></div>
+        <div class="t2"><p><%= student.studentInfo.academic_year %></p></div>
+        <div class="t55"><p><%= data.to_name %></p></div>
+        <div class="t55"><p><%= data.attach_one %></p></div>
+        <div class="t55"><p><%= data.attach_two %></p></div>
+        <div class="t3"><p><%= student.name %></p></div>
+        <div class="t4"><p><%= student.studentInfo.student_code %></p></div>
+        <div class="t5"><p><%= student.studentInfo.faculty %></p></div>
+        <div class="t6"><p><%= student.studentInfo.department %></p></div>
+        <div class="t7"><p><%= student.studentInfo.education_level %></p></div>
+        <div class="t8"><p><%= student.studentInfo.gpax %></p></div>
+        <div class="t9"><p><%= student.studentInfo.level %></p></div>
         <div class="t10"><p>ปกติ</p></div>
-        <div class="t11"><p>0633437712</p></div>
-        <div class="t12"><p>thang_thang_rattana@hotmail.com</p></div>
-        <div class="t56"><p>รศ.ชูเกียรติ วรสุชีพ</p></div>
-        <div class="t58"><p>7</p></div>
-        <div class="t59"><p>7 เมษยน 2564</p></div>
-        <div class="t60"><p>14 เมษยน 2564</p></div>
-        <div class="t57"><p>ดังนั้นการลากิจจึงต้องพิจารณาไปตามหลักเกณฑ์และเงื่อนไขที่นายจ้างกำหนดตามข้อบังคับเกี่ยวกับการทำงานหรือบางแห่งอาจมีระเบียบการลากำหนดไว้โดยเฉพาะก็ให้บังคับและปฏิบัติตามระเบียบดังกล่าวได้</p></div>
-        <div class="t49"><p>ยินยอมให้ลาป่วยเนื่องจากอาการของนักศึกษาค่อนข้างรุนแรง และขอให้ดูแลสุขภาพด้วยนะครับ</p></div>
-        <div class="t50"><img class="signature"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t51"><p>ยินยอมให้ลาป่วยเนื่องจากอาการของนักศึกษาค่อนข้างรุนแรง และขอให้ดูแลสุขภาพด้วยนะครับ อย่าลืมที่จะล้างมือและใส่หน้ากากอนามัยทุกครั้งที่ออกจากบ้านนะครับ</p></div>
-        <div class="t52"><img class="signature"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t61"><p>ยินยอมให้ลาป่วยเนื่องจากอาการของนักศึกษาค่อนข้างรุนแรง และขอให้ดูแลสุขภาพด้วยนะครับ อย่าลืมที่จะล้างมือและใส่หน้ากากอนามัยทุกครั้งที่ออกจากบ้านนะครับ</p></div>
-        <div class="t53"><img class="signature"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
+        <div class="t11"><p><%= student.studentInfo.phone %></p></div>
+        <div class="t12"><p><%= student.email %></p></div>
+        <div class="t56"><p><%= approves[0].teacher.name %></p></div>
+        <div class="t55"><p><%= data.time_period %></p></div>
+        <div class="t55"><p><%= data.startDate %></p></div>
+        <div class="t55"><p><%= data.endDate %></p></div>
+        <div class="t55"><p><%= data.wish %></p></div>
+        <div class="t49"><p><%= approves[0].comment %></p></div>
+        <div class="t50"><img class="signature"src="<%= approves[0].teacher.signature_url %>" alt="1.png" /></div>
+        <div class="t49"><p><%= approves[1].comment %></p></div>
+        <div class="t52"><img class="signature"src="<%= approves[1].teacher.signature_url %>" alt="1.png" /></div>
+        <div class="t49"><p><%= approves[2].comment %></p></div>
+        <div class="t53"><img class="signature"src="<%= approves[2].teacher.signature_url %>" alt="1.png" /></div>
         <div class="header">
 
             <div class="title">

@@ -743,59 +743,77 @@ hr {
 <title> RO26</title>
 <body>
     <div class="p1">
-        <div class="t1"><p>1</p></div>
-        <div class="t2"><p>2553</p></div>
-        <div class="t3"><p>รัตนา จงพิศาลพัฒนา</p></div>
-        <div class="t4"><p>60090500445</p></div>
-        <div class="t5"><p>คณะวิทยาศาสตร์</p></div>
-        <div class="t6"><p>วิทยาการคอมพิวเตอร์ประยุกต์</p></div>
-        <div class="t7"><p>ปริญญาตรี</p></div>
-        <div class="t8"><p>2.98</p></div>
-        <div class="t9"><p>4</p></div>
+        <div class="t1"><p><%= student.studentInfo.semeter %></p></div>
+        <div class="t2"><p><%= student.studentInfo.academic_year %></p></div>
+        <div class="t3"><p><%= student.name %></p></div>
+        <div class="t4"><p><%= student.studentInfo.student_code %></p></div>
+        <div class="t5"><p><%= student.studentInfo.faculty %></p></div>
+        <div class="t6"><p><%= student.studentInfo.department %></p></div>
+        <div class="t7"><p><%= student.studentInfo.education_level %></p></div>
+        <div class="t8"><p><%= student.studentInfo.gpax %></p></div>
+        <div class="t9"><p><%= student.studentInfo.level %></p></div>
         <div class="t10"><p>ปกติ</p></div>
-        <div class="t11"><p>0633437712</p></div>
-        <div class="t12"><p>thang_thang_rattana@hotmail.com</p></div>
-        <div class="t13"><p>CSS111</p></div>
-        <div class="t14"><p>21</p></div>
-        <div class="t15"><p>3</p></div>
-        <div class="t16"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t17"><p>CSS112</p></div>
-        <div class="t18"><p>22</p></div>
-        <div class="t19"><p>3</p></div>
-        <div class="t20"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t21"><p>CSS113</p></div>
-        <div class="t22"><p>23</p></div>
-        <div class="t23"><p>3</p></div>
-        <div class="t24"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t25"><p>CSS211</p></div>
-        <div class="t26"><p>41</p></div>
-        <div class="t27"><p>3</p></div>
-        <div class="t28"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t29"><p>CSS212</p></div>
-        <div class="t30"><p>42</p></div>
-        <div class="t31"><p>3</p></div>
-        <div class="t32"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t33"><p>CSS213</p></div>
-        <div class="t34"><p>43</p></div>
-        <div class="t35"><p>3</p></div>
-        <div class="t36"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t37"><p>CSS311</p></div>
-        <div class="t38"><p>61</p></div>
-        <div class="t39"><p>3</p></div>
-        <div class="t40"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t41"><p>CSS312</p></div>
-        <div class="t42"><p>62</p></div>
-        <div class="t43"><p>3</p></div>
-        <div class="t44"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t45"><p>CSS313</p></div>
-        <div class="t46"><p>63</p></div>
-        <div class="t47"><p>3</p></div>
-        <div class="t48"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t49"><p>ยินยอมให้เปลี่ยนกลุ่มวิชาเนื่องจากนักศึกษามีความประสงค์จะเรียนวิชานี้จริงๆ</p></div>
-        <div class="t50"><img class="signature"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t51"><p>ยินยอมให้เปลี่ยนกลุ่มวิชาเนื่องจากนักศึกษามีความประสงค์จะเรียนวิชานี้จริงๆนะครับบบบบบบ</p></div>
-        <div class="t52"><img class="signature"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
-        <div class="t53"><img class="signature"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div>
+        <div class="t11"><p><%= student.studentInfo.phone %></p></div>
+        <div class="t12"><p><%= student.email %></p></div>
+        <% if (data['ADDSUBJECT'][0]) { %>
+        <div class="t13"><p><%= data['ADDSUBJECT'][0].course_code %></p></div>
+        <div class="t14"><p><%= data['ADDSUBJECT'][0].group_number %></p></div>
+        <div class="t15"><p><%= data['ADDSUBJECT'][0].credit %></p></div>
+        <% } %>
+        <!-- <div class="t16"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div> -->
+        <% if (data['ADDSUBJECT'][1]) { %>
+        <div class="t13"><p><%= data['ADDSUBJECT'][1].course_code %></p></div>
+        <div class="t14"><p><%= data['ADDSUBJECT'][1].group_number %></p></div>
+        <div class="t15"><p><%= data['ADDSUBJECT'][1].credit %></p></div>
+        <% } %>
+        <!-- <div class="t20"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div> -->
+        <% if (data['ADDSUBJECT'][2]) { %>
+        <div class="t21"><p><%= data['ADDSUBJECT'][2].course_code %></p></div>
+        <div class="t22"><p><%= data['ADDSUBJECT'][2].group_number %></p></div>
+        <div class="t23"><p><%= data['ADDSUBJECT'][2].credit %></p></div>
+        <% } %>
+        <!-- <div class="t24"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div> -->
+        <% if (data['WITHDRAWAL'][0]) { %>
+        <div class="t25"><p><%= data['WITHDRAWAL'][0].course_code  %></p></div>
+        <div class="t26"><p><%= data['WITHDRAWAL'][0].group_number  %></p></div>
+        <div class="t27"><p><%= data['WITHDRAWAL'][0].credit  %></p></div>
+        <% } %>
+        <!-- <div class="t28"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div> -->
+        <% if (data['WITHDRAWAL'][1]) { %>
+        <div class="t29"><p><%= data['WITHDRAWAL'][1].course_code %></p></div>
+        <div class="t30"><p><%= data['WITHDRAWAL'][1].group_number %></p></div>
+        <div class="t31"><p><%= data['WITHDRAWAL'][1].credit %></p></div>
+        <% } %>
+        <!-- <div class="t32"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div> -->
+        <% if (data['WITHDRAWAL'][2]) { %>
+        <div class="t33"><p><%= data['WITHDRAWAL'][2].course_code %></p></div>
+        <div class="t34"><p><%= data['WITHDRAWAL'][2].group_number %></p></div>
+        <div class="t35"><p>d<%= ata['WITHDRAWAL'][2].credit %></p></div>
+        <% } %>
+        <!-- <div class="t36"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div> -->
+        <% if (data['CHANGESECTION'][0]) { %>
+        <div class="t37"><p><%= data['CHANGESECTION'][0].course_code %></p></div>
+        <div class="t38"><p><%= data['CHANGESECTION'][0].group_number %></p></div>
+        <div class="t39"><p><%= data['CHANGESECTION'][0].credit %></p></div>
+        <% } %>
+        <!-- <div class="t40"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div> -->
+        <% if (data['CHANGESECTION'][1]) { %>
+        <div class="t41"><p><%= data['CHANGESECTION'][1].course_code %></p></div>
+        <div class="t42"><p><%= data['CHANGESECTION'][1].group_number %></p></div>
+        <div class="t43"><p><%= data['CHANGESECTION'][1].credit %></p></div>
+        <% } %>
+        <!-- <div class="t44"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div> -->
+        <% if (data['CHANGESECTION'][2]) { %>
+        <div class="t45"><p><%= data['CHANGESECTION'][2].course_code %></p></div>
+        <div class="t46"><p><%= data['CHANGESECTION'][2].group_number %></p></div>
+        <div class="t47"><p><%= data['CHANGESECTION'][2].credit %></p></div>
+        <% } %>
+        <!-- <div class="t48"><img class="signature-mini"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div> -->
+        <div class="t49"><p><%= approves[0].comment %></p></div>
+        <div class="t50"><img class="signature"src=<%= approves[0].teacher.signature_url %> alt="1.png" /></div>
+        <div class="t51"><p><%= approves[1].comment %></p></div>
+        <div class="t52"><img class="signature"src=<%= approves[1].teacher.signature_url %> alt="1.png" /></div>
+        <!-- <div class="t53"><img class="signature"src="https://www.img.in.th/images/518afbb8aa9556ee5820c5eaa9f69666.png" alt="1.png" /></div> -->
         <div class="header">
 
             <div class="title">
