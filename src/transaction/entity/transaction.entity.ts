@@ -15,7 +15,7 @@ import { Approve } from './approve.entity';
 import { MappingDocument } from './document-mapping.entity';
 import { DocumentType } from './document-type.entity';
 
-export const PREFIX_TRASACTION = `trasaction_document_`;
+export const PREFIX_TRASACTION = `trasanction_document_`;
 @Entity()
 export class TransactionDocument extends BaseEntity {
   @PrimaryColumn()
