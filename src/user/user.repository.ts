@@ -1,19 +1,25 @@
 import { EntityRepository, Repository } from 'typeorm';
-import { StudentDto, StudentUUID, UserUUID } from './dto/create-student.dto';
-import { SignCredentialsDto } from './dto/sign-credentials.dto';
-import { StudentInfo } from './model/student.entity';
-import { User } from './model/user.entity';
-import { TeacherDto } from './dto/create-teacher.dto';
+import {
+  StudentDto,
+  StudentUUID,
+  UserUUID,
+} from '../authentication/dto/create-student.dto';
+import { StudentInfo } from './entity/student.entity';
+import { User } from './entity/user.entity';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import {
   ConflictException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
-import { AdvicerAdvisee } from './model/advicer.entity';
+import { AdvicerAdvisee } from './entity/advicer.entity';
+import { SignInCredentialsDto } from 'src/authentication/dto/signIn-credentials.dto';
+import { TeacherDto } from 'src/authentication/dto/create-teacher.dto';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
+  // Mock function... delete
   async signInStudent(studentDto: StudentDto): Promise<any> {
     const {
       username,
@@ -112,10 +118,25 @@ export class UserRepository extends Repository<User> {
     }
   }
 
+  async getUserDetail(id: string): Promise<User> {
+    const user = await this.createQueryBuilder('user')
+      .where(`user.id = :id`, { id: id })
+      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('user.advisee', 'advisee')
+      .leftJoinAndSelect('advisee.advicer', 'advicer')
+      .getOne();
+
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return user;
+  }
+
   async validateUserPassword(
-    signCredentialsDto: SignCredentialsDto,
+    signInCredentialsDto: SignInCredentialsDto,
   ): Promise<User> {
-    const { username, password } = signCredentialsDto;
+    const { username, password } = signInCredentialsDto;
     const user = await this.findOne({ username });
 
     if (user && (await user.validatePassword(password))) {

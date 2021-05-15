@@ -12,6 +12,8 @@ import {
 import * as bcrypt from 'bcrypt';
 import { StudentInfo } from './student.entity';
 import { AdvicerAdvisee } from './advicer.entity';
+import { TransactionDocument } from 'src/transaction/entity/transaction.entity';
+import { Approve } from 'src/transaction/entity/approve.entity';
 
 @Entity()
 @Unique(['username', 'email'])
@@ -52,7 +54,13 @@ export class User extends BaseEntity {
   advicer: AdvicerAdvisee[];
 
   @OneToOne(() => AdvicerAdvisee, (advicerAdvisee) => advicerAdvisee.advisee)
-  advisee: StudentInfo;
+  advisee: AdvicerAdvisee;
+
+  @OneToMany(() => TransactionDocument, (trasactionDoc) => trasactionDoc.user)
+  transaction: TransactionDocument[];
+
+  @OneToMany(() => Approve, (approve) => approve.teacher)
+  approve: Approve[];
 
   @CreateDateColumn({ type: 'timestamp' })
   create_date: Date;
