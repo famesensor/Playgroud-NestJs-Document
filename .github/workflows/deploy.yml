@@ -29,18 +29,21 @@ jobs:
       - name: Setup environment
         env:
           environment: dev
-          dev_port: 9000
-          db_host: ${{secrets.DB_HOST}}
-          db_name: ${{secrets.DB_NAME}}
-          db_username: ${{secrets.DB_USERNAME}}
-          db_password: ${{secrets.DB_PASSWORD}}
-          db_port: ${{secrets.DB_PORT}}
-          db_cert: ${{secrets.DB_CERT}}
+          DEV_PORT: 9000
+          DB_HOST: ${{secrets.DB_HOST}}
+          DB_NAME: ${{secrets.DB_NAME}}
+          DB_USERNAME: ${{secrets.DB_USERNAME}}
+          DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+          DB_PORT: ${{secrets.DB_PORT}}
+          DB_CERT: ${{secrets.DB_CERT}}
         run: |
           cd ..
           git clone https://${{secrets.MY_GITHUB_TOKEN}}@github.com/famesensor/${{secrets.SECRET_REPOSITORY}}.git
-      - run: npm run build --if-present
-      - run: npm test
+          cd ./Playgroud-NestJs-Document
+      - name: Build app
+        run: npm run build --if-present
+      - name: Run Test
+        run: npm test
 
   deploy:
     needs: [build]
