@@ -28,6 +28,7 @@ jobs:
         run: npm ci
       - name: Setup environment
         env:
+          environment: dev
           DEV_PORT: 9000
           DB_HOST: ${{secrets.DB_HOST}}
           DB_NAME: ${{secrets.DB_NAME}}
