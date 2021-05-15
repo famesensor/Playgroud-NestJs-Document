@@ -36,9 +36,9 @@ jobs:
           DB_PASSWORD: ${{secrets.DB_PASSWORD}}
           DB_PORT: ${{secrets.DB_PORT}}
           DB_CERT: ${{secrets.DB_CERT}}
-      - run: |
-        cd ..
-        git clone https://${{secrets.MY_GITHUB_TOKEN}}@github.com/famesensor/${{secrets.SECRET_REPOSITORY}}.git
+        run: |
+          cd ..
+          git clone https://${{secrets.MY_GITHUB_TOKEN}}@github.com/famesensor/${{secrets.SECRET_REPOSITORY}}.git
       - run: npm run build --if-present
       - run: npm test
 
