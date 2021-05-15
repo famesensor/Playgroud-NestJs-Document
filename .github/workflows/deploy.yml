@@ -10,52 +10,41 @@ on:
   #   branches: [ develop ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [10.x, 12.x, 14.x, 15.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-        # - name: Install dependencies
-      - run: npm ci
-      - name: Setup environment
-        env:
-          environment: dev
-          DEV_PORT: 9000
-          DB_HOST: ${{secrets.DB_HOST}}
-          DB_NAME: ${{secrets.DB_NAME}}
-          DB_USERNAME: ${{secrets.DB_USERNAME}}
-          DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-          DB_PORT: ${{secrets.DB_PORT}}
-          DB_CERT: ${{secrets.DB_CERT}}
-        run:
-      - name: Build app
-        run: npm run build --if-present
-      - name: Run Test
-        run: npm test
-
-  # deploy:
-  #   needs: [build]
+  # build:
   #   runs-on: ubuntu-latest
 
+  #   strategy:
+  #     matrix:
+  #       node-version: [10.x, 12.x, 14.x, 15.x]
+  #       # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
   #   steps:
-  #     - name: SSH and deploy node app
-  #       uses: appleboy/ssh-action@master
+  #     - uses: actions/checkout@v2
+  #     - name: Use Node.js ${{ matrix.node-version }}
+  #       uses: actions/setup-node@v1
   #       with:
-  #         host: ${{secrets.SSH_HOST}}
-  #         username: ${{secrets.SSH_USERNAME}}
-  #         key: ${{secrets.SSH_KEY}}
-  #         script: |
-  #           cd ~/Playgroud-NestJs-Document
-  #           git pull origin develop
-  #           npm ci
-  #           npm run build
-  #           pm2 restart Playgroud-NestJs-Document
+  #         node-version: ${{ matrix.node-version }}
+  #     - name: Install dependencies
+  #       run: npm ci
+  #     - name: Build app
+  #       run: npm run build --if-present
+  #     - name: Run Test
+  #       run: npm test
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH and deploy node app
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.SSH_HOST}}
+          username: ${{secrets.SSH_USERNAME}}
+          key: ${{secrets.SSH_KEY}}
+          script: |
+            cd ~/Playgroud-NestJs-Document
+            git pull origin develop
+            npm ci
+            npm run build
+            pm2 restart donumentor
