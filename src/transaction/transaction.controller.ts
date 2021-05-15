@@ -25,8 +25,7 @@ import { PaginationDto } from 'src/shared/dto/pagination/pagination.dto';
 import { CommentDto } from './dto/create-comment.dto';
 import { Response } from 'express';
 
-// TODO: change response all...
-@Controller('trasaction')
+@Controller('transaction')
 export class TrasactionController {
   constructor(private trasactionService: TrasactionService) {}
 
