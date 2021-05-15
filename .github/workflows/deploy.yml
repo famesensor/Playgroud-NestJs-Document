@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
@@ -36,6 +36,7 @@ jobs:
           DB_PASSWORD: ${{secrets.DB_PASSWORD}}
           DB_PORT: ${{secrets.DB_PORT}}
           DB_CERT: ${{secrets.DB_CERT}}
+        run:
       - name: Build app
         run: npm run build --if-present
       - name: Run Test
