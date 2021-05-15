@@ -3,13 +3,13 @@ server:
 
 db:
   type: 'postgres'
-  port: db_port
-  database: db_name
-  host: db_host
-  username: db_username
-  password: db_password
+  port: DB_PORT
+  database: DB_NAME
+  host: DB_HOST
+  username: DB_USERNAME
+  password: DB_PASSWORD
   synchronize: true
-  ca: db_cert
+  ca: DB_CERT
 
 jwt:
   expiresIn: 3600
