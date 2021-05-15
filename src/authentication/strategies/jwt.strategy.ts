@@ -3,21 +3,18 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule, PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from 'src/user/user.repository';
-import * as config from 'config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload } from './jwt.payload';
 import { User } from 'src/user/entity/user.entity';
 import { Role } from 'src/shared/enums/role.enum';
 
-const jwtConfig = config.get('jwt');
-
 export const JWTExportationModules = [PassportModule, JwtModule];
 export const model_importation = [
   PassportModule.register({ defaultStrategy: 'jwt' }),
   JwtModule.register({
-    secret: jwtConfig.secret,
+    secret: process.env.SECRET_KEY,
     signOptions: {
-      expiresIn: jwtConfig.expiresIn,
+      expiresIn: process.env.EXPIRES_IN,
     },
   }),
 ];
@@ -29,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: jwtConfig.secret,
+      secretOrKey: process.env.SECRET_KEY,
     });
   }
 

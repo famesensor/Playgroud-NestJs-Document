@@ -1,18 +1,16 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import * as config from 'config';
-import { fstat, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 
-const dbConfig = config.get('db');
 export const typeOrmConfig: TypeOrmModuleOptions = {
-  type: dbConfig.type,
-  host: dbConfig.host,
-  port: dbConfig.port,
-  username: dbConfig.username,
-  password: dbConfig.password,
-  database: dbConfig.database,
+  type: 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT, 10) || 5432,
+  username: process.env.DB_USERNAME || 'postgres',
+  password: process.env.DB_PASSWORD || 'postgres',
+  database: process.env.DB_NAME || 'documentor',
   ssl: {
     ca: readFileSync('./config/ca-certificate.crt'),
   },
   entities: [__dirname + '/../**/entity/*.entity.{js,ts}'],
-  synchronize: dbConfig.synchronize,
+  synchronize: true,
 };
