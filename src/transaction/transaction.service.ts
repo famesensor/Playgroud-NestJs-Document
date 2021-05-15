@@ -31,7 +31,7 @@ import { IPdfOption } from 'src/interfaces/IPdfOption';
 import { CourseStatus, TypeDocument } from './enum/transaction.enum';
 import { compile } from 'ejs';
 import { create } from 'html-pdf';
-import { readFileSync } from 'node:fs';
+import { readFileSync } from 'fs';
 
 @Injectable()
 export class TrasactionService {
