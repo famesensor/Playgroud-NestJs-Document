@@ -1,13 +1,13 @@
-db:
-  host: 'localhost'
-  username: 'postgres'
-  password: 'postgres'
-  synchronize: false
+# db:
+#   host: 'localhost'
+#   username: 'postgres'
+#   password: 'postgres'
+#   synchronize: false
 
-jwt:
-  secret: 'sercret'
+# jwt:
+#   secret: 'sercret'
 
-mailer:
-  host: ''
-  user: ''
-  pass: ''
+# mailer:
+#   host: ''
+#   user: ''
+#   pass: ''

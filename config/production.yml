@@ -1,0 +1,23 @@
+server:
+  port: APP_PORT
+
+db:
+  type: 'postgres'
+  port: DB_PORT
+  database: DB_DATABASE
+  host: DB_HOST
+  username: DB_USERNAME
+  password: DB_PASSWORD
+  synchronize: true
+  ca: DB_CERT
+
+jwt:
+  expiresIn: 3600
+  secret: 'sercret'
+
+mailer:
+  secure: true
+  from: '"No Reply" <noreply@example.com>'
+  host: ''
+  user: ''
+  pass: ''
