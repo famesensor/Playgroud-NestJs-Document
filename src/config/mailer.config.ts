@@ -1,19 +1,17 @@
 import { MailerOptions } from '@nestjs-modules/mailer';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
-import * as config from 'config';
 
-const mailerConfig = config.get('mailer');
 export const mailConfig: MailerOptions = {
   transport: {
-    host: mailerConfig.host,
-    secure: mailerConfig.secure,
+    host: process.env.HOST,
+    secure: true,
     auth: {
-      user: mailerConfig.user,
-      pass: mailerConfig.pass,
+      user: process.env.USER,
+      pass: process.env.PASS,
     },
   },
   defaults: {
-    from: mailerConfig.from,
+    from: process.env.FROM,
   },
   template: {
     adapter: new EjsAdapter(), // or new PugAdapter() or new EjsAdapter()
