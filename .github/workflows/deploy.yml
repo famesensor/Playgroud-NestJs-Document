@@ -38,7 +38,7 @@ jobs:
           DB_CERT: ${{secrets.DB_CERT}}
       - run: |
         cd ..
-        git clone https://${{secrets.MY_GITHUB_TOKEN}}@github.com/famesensor/Playgroud-NestJs-Document.git
+        git clone https://${{secrets.MY_GITHUB_TOKEN}}@github.com/famesensor/${{secrets.SECRET_REPOSITORY}}.git
       - run: npm run build --if-present
       - run: npm test
 
@@ -54,8 +54,8 @@ jobs:
           username: ${{secrets.SSH_USERNAME}}
           key: ${{secrets.SSH_KEY}}
           script: |
-            cd ~/documentor
+            cd ~/Playgroud-NestJs-Document
             git pull origin develop
             npm ci
             npm run build
-            pm2 restart documentor
+            pm2 restart Playgroud-NestJs-Document
