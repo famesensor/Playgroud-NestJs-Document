@@ -196,7 +196,8 @@ export class TrasactionService {
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
       .leftJoinAndSelect('transaction_document.type', 'type')
       .leftJoin('transaction_document.approve', 'approve')
-      .where('approve.teacher_id = :id', { id: user.id })
+      .leftJoin('approve.teacher', 'teacher')
+      .where('teacher.id = :id', { id: user.id })
       .andWhere('transaction_document.credit = approve.step');
 
     // filter type document...
