@@ -1,5 +1,6 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as config from 'config';
+import { fstat, readFileSync } from 'fs';
 
 const dbConfig = config.get('db');
 export const typeOrmConfig: TypeOrmModuleOptions = {
@@ -10,7 +11,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   password: dbConfig.password,
   database: dbConfig.database,
   ssl: {
-    ca: dbConfig.ca,
+    ca: readFileSync('./config/ca-certificate.crt'),
   },
   entities: [__dirname + '/../**/entity/*.entity.{js,ts}'],
   synchronize: dbConfig.synchronize,
