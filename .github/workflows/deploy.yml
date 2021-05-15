@@ -47,4 +47,4 @@ jobs:
             git pull origin develop
             npm ci
             npm run build
-            pm2 restart donumentor
+            pm2 restart documentor
