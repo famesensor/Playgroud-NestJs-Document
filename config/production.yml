@@ -1,5 +1,5 @@
 server:
-  port: APP_PORT
+  port: DEV_PORT
 
 db:
   type: 'postgres'
