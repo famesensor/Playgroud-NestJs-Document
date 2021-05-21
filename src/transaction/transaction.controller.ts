@@ -14,7 +14,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/shared/decorators/get-user.decorator';
 import { Role } from 'src/shared/enums/role.enum';
 import { RolesGuard } from 'src/shared/guards/role/role.guard';
-import { Roles } from 'src/shared/guards/role/roles.decorator';
+import { Roles } from 'src/shared/decorators/roles.decorator';
 import { User } from 'src/user/entity/user.entity';
 import { RO01Dto } from './dto/create-ro01.dto';
 import { RO16Dto } from './dto/create-ro16.dto';
@@ -25,8 +25,7 @@ import { PaginationDto } from 'src/shared/dto/pagination/pagination.dto';
 import { CommentDto } from './dto/create-comment.dto';
 import { Response } from 'express';
 
-// TODO: change response all...
-@Controller('trasaction')
+@Controller('transaction')
 export class TrasactionController {
   constructor(private trasactionService: TrasactionService) {}
 

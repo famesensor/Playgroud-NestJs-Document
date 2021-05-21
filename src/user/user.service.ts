@@ -15,10 +15,8 @@ export class UserService {
       .leftJoinAndSelect('user.studentInfo', 'studentInfo')
       .leftJoinAndSelect('user.advisee', 'advisee')
       .leftJoinAndSelect('advisee.advicer', 'advicer')
-      // .leftJoinAndSelect('user.advicer', 'advicer')
-      // .leftJoinAndSelect('advicer.advisee', 'advisee')
       .getOne();
 
-    return data;
+    return { status: true, data };
   }
 }
