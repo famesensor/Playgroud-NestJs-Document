@@ -14,7 +14,7 @@ export const model_importation = [
   JwtModule.register({
     secret: process.env.SECRET_KEY,
     signOptions: {
-      expiresIn: process.env.EXPIRES_IN,
+      expiresIn: parseInt(process.env.EXPIRES_IN, 10) || 3600,
     },
   }),
 ];
