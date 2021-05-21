@@ -8,9 +8,9 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'documentor',
-  // ssl: {
-  //   ca: readFileSync('./config/ca-certificate.crt'),
-  // },
+  ssl: {
+    ca: readFileSync('./config/ca-certificate.crt'),
+  },
   entities: [__dirname + '/../**/entity/*.entity.{js,ts}'],
   synchronize: true,
 };
