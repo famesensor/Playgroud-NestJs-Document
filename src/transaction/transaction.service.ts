@@ -32,6 +32,7 @@ import { CourseStatus, TypeDocument } from './enum/transaction.enum';
 import { compile } from 'ejs';
 import { create } from 'html-pdf';
 import { readFileSync } from 'fs';
+import logger from 'src/config/logger.config';
 
 @Injectable()
 export class TrasactionService {
@@ -50,21 +51,21 @@ export class TrasactionService {
 
   // create document ro01...
   async createRO01(user: User, ro01Dto: RO01Dto): Promise<any> {
-    // get student info...
-    const info = await this.userRepository.getUserDetail(user.id);
-
-    // get type document...
-    const typeInfo = await this.getTypeDocument(TypeDocument.RO01);
-
-    // get teacher list...
-    const teachers: User[] = [];
-    const leader = await this.userRepository.findOne({ role: Role.Leader });
-    if (!leader) {
-      throw new NotFoundException(`Head of Department Not Found.`);
-    }
-    teachers.push(info.advisee.advicer, leader);
-
     try {
+      // get student info...
+      const info = await this.userRepository.getUserDetail(user.id);
+
+      // get type document...
+      const typeInfo = await this.getTypeDocument(TypeDocument.RO01);
+
+      // get teacher list...
+      const teachers: User[] = [];
+      const leader = await this.userRepository.findOne({ role: Role.Leader });
+      if (!leader) {
+        throw new NotFoundException(`Head of Department Not Found.`);
+      }
+      teachers.push(info.advisee.advicer, leader);
+
       await this.ro01Repository.createDocumentRO01(
         ro01Dto,
         info,
@@ -85,7 +86,7 @@ export class TrasactionService {
       };
       await this.sendEmail(option);
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       throw new InternalServerErrorException();
     }
 
@@ -94,26 +95,26 @@ export class TrasactionService {
 
   // create document ro16...
   async createRO16(user: User, ro16Dto: RO16Dto): Promise<any> {
-    // get student info...
-    const info = await this.userRepository.getUserDetail(user.id);
-
-    // get type document...
-    const typeInfo = await this.getTypeDocument(TypeDocument.RO16);
-
-    // get teacher list...
-    const teachers: User[] = [];
-    const boss = await this.userRepository.findOne({ role: Role.Boss });
-    if (!boss) {
-      throw new NotFoundException(`Dean’s Not Found.`);
-    }
-
-    const leader = await this.userRepository.findOne({ role: Role.Leader });
-    if (!leader) {
-      throw new NotFoundException(`Head of Department Not Found.`);
-    }
-    teachers.push(info.advisee.advicer, leader, boss);
-
     try {
+      // get student info...
+      const info = await this.userRepository.getUserDetail(user.id);
+
+      // get type document...
+      const typeInfo = await this.getTypeDocument(TypeDocument.RO16);
+
+      // get teacher list...
+      const teachers: User[] = [];
+      const boss = await this.userRepository.findOne({ role: Role.Boss });
+      if (!boss) {
+        throw new NotFoundException(`Dean’s Not Found.`);
+      }
+
+      const leader = await this.userRepository.findOne({ role: Role.Leader });
+      if (!leader) {
+        throw new NotFoundException(`Head of Department Not Found.`);
+      }
+      teachers.push(info.advisee.advicer, leader, boss);
+
       await this.re16Repository.createDocumentRO16(
         ro16Dto,
         user,
@@ -134,7 +135,7 @@ export class TrasactionService {
       };
       await this.sendEmail(option);
     } catch (error) {
-      console.log(error);
+      logger.log(error);
       throw new InternalServerErrorException();
     }
 
@@ -143,21 +144,21 @@ export class TrasactionService {
 
   // create document ro26...
   async createRO26(user: User, subject: SubjectDto[]): Promise<any> {
-    // get student info...
-    const info = await this.userRepository.getUserDetail(user.id);
-
-    // get type document...
-    const typeInfo = await this.getTypeDocument(TypeDocument.RO26);
-
-    // get teacher list...
-    const teachers: User[] = [];
-    const leader = await this.userRepository.findOne({ role: Role.Leader });
-    if (!leader) {
-      throw new NotFoundException(`Head of Department Not Found.`);
-    }
-    teachers.push(info.advisee.advicer, leader);
-
     try {
+      // get student info...
+      const info = await this.userRepository.getUserDetail(user.id);
+
+      // get type document...
+      const typeInfo = await this.getTypeDocument(TypeDocument.RO26);
+
+      // get teacher list...
+      const teachers: User[] = [];
+      const leader = await this.userRepository.findOne({ role: Role.Leader });
+      if (!leader) {
+        throw new NotFoundException(`Head of Department Not Found.`);
+      }
+      teachers.push(info.advisee.advicer, leader);
+
       await this.re26Repository.createDocumentRO16(
         subject,
         info,
@@ -178,7 +179,7 @@ export class TrasactionService {
       };
       await this.sendEmail(option);
     } catch (error) {
-      console.log(error);
+      logger.log(error);
       throw new InternalServerErrorException();
     }
     return { status: true, message: 'success' };
@@ -233,40 +234,49 @@ export class TrasactionService {
     limit != 0 ? limit : 10;
     const offset = (page - 1) * limit;
 
-    const [res, resCount] = await Promise.all([
-      doc.offset(offset).limit(limit).getMany(),
-      doc.getCount(),
-    ]);
+    try {
+      const [res, resCount] = await Promise.all([
+        doc.offset(offset).limit(limit).getMany(),
+        doc.getCount(),
+      ]);
 
-    return {
-      status: true,
-      data: res,
-      page: page,
-      total: resCount < limit ? 1 : Math.floor(resCount / limit),
-    };
+      return {
+        status: true,
+        data: res,
+        page: page,
+        total: resCount < limit ? 1 : Math.floor(resCount / limit),
+      };
+    } catch (error) {
+      logger.error(error);
+      throw new InternalServerErrorException();
+    }
   }
 
   // get document...
   async getDocument(id: string): Promise<any> {
-    const doc = await this.trasactionRepository
-      .createQueryBuilder('transaction_document')
-      .leftJoinAndSelect('transaction_document.user', 'user')
-      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-      .leftJoinAndSelect('transaction_document.type', 'type')
-      .leftJoinAndSelect('transaction_document.mapping', 'mapping')
-      .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
-      .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
-      .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
-      .where('transaction_document.id = :id', {
-        id: id,
-      })
-      .getOne();
+    try {
+      const doc = await this.trasactionRepository
+        .createQueryBuilder('transaction_document')
+        .leftJoinAndSelect('transaction_document.user', 'user')
+        .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+        .leftJoinAndSelect('transaction_document.type', 'type')
+        .leftJoinAndSelect('transaction_document.mapping', 'mapping')
+        .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
+        .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
+        .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
+        .where('transaction_document.id = :id', {
+          id: id,
+        })
+        .getOne();
+      if (!doc) {
+        throw new NotFoundException('Document Not Found');
+      }
 
-    if (!doc) {
-      throw new NotFoundException('Document Not Found');
+      return { status: true, data: doc };
+    } catch (error) {
+      logger.error(error);
+      throw new InternalServerErrorException();
     }
-
-    return { status: true, data: doc };
   }
 
   // approve and comment docuement...
@@ -278,36 +288,35 @@ export class TrasactionService {
     const { comment } = commentDto;
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
-
-    const docRes = await this.trasactionRepository
-      .createQueryBuilder('transaction_document')
-      .leftJoinAndSelect('transaction_document.user', 'user')
-      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-      .leftJoinAndSelect('transaction_document.type', 'type')
-      .leftJoinAndSelect('transaction_document.approve', 'approve')
-      .where('transaction_document.id = :id', { id })
-      .andWhere(
-        'approve.teacherId = :teacher_id AND approve.status = :status',
-        {
-          teacher_id: userId,
-          status: 'waiting',
-        },
-      )
-      .getOne();
-
-    if (!docRes) throw new NotFoundException(`Document Not Found.`);
-
-    if (docRes.success) throw new BadRequestException();
-
-    if (docRes.credit !== docRes.approve[0].step)
-      throw new ForbiddenException();
-
-    const teacher = await this.userRepository.getUserDetail(userId);
-    if (!teacher) throw new NotFoundException(`Teacher Not Found.`);
-
-    await queryRunner.startTransaction();
-
     try {
+      const docRes = await this.trasactionRepository
+        .createQueryBuilder('transaction_document')
+        .leftJoinAndSelect('transaction_document.user', 'user')
+        .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+        .leftJoinAndSelect('transaction_document.type', 'type')
+        .leftJoinAndSelect('transaction_document.approve', 'approve')
+        .where('transaction_document.id = :id', { id })
+        .andWhere(
+          'approve.teacherId = :teacher_id AND approve.status = :status',
+          {
+            teacher_id: userId,
+            status: 'waiting',
+          },
+        )
+        .getOne();
+
+      if (!docRes) throw new NotFoundException(`Document Not Found.`);
+
+      if (docRes.success) throw new BadRequestException();
+
+      if (docRes.credit !== docRes.approve[0].step)
+        throw new ForbiddenException();
+
+      const teacher = await this.userRepository.getUserDetail(userId);
+      if (!teacher) throw new NotFoundException(`Teacher Not Found.`);
+
+      await queryRunner.startTransaction();
+
       // update approve...
       await queryRunner.manager.update(
         Approve,
@@ -345,7 +354,7 @@ export class TrasactionService {
 
       await this.sendEmail(option);
     } catch (error) {
-      console.log(error);
+      logger.log(error);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -359,47 +368,46 @@ export class TrasactionService {
   async confirmApprove(id: string, approveId: string): Promise<any> {
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
-
-    const docRes = await this.trasactionRepository
-      .createQueryBuilder('transaction_document')
-      .leftJoinAndSelect('transaction_document.user', 'user')
-      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-      .leftJoinAndSelect('transaction_document.type', 'type')
-      .leftJoinAndSelect('transaction_document.approve', 'approve')
-      .leftJoinAndSelect('approve.teacher', 'teacher')
-      .where('transaction_document.id = :id AND approve.status = :status', {
-        id,
-        status: 'waiting',
-      })
-      .orderBy('approve.step', 'ASC')
-      .getOne();
-
-    if (!docRes) throw new NotFoundException('Document Not Found.');
-
-    const index = docRes.approve.findIndex((item) => {
-      return item.id === approveId && item.step === docRes.credit;
-    });
-    if (!docRes.approve[index]) throw new ForbiddenException();
-
-    let isSuccess = true;
-    let email = docRes.user.email;
-    let subject = `คำร้องขอ ${docRes.type.type_name} ของนักศึกษาได้รับการตอบร้อบแล้ว`;
-    let template = `/templates/student`;
-    const pdfLink = `http://localhost:3000/api/trasaction/${id}/download-document`;
-    if (docRes.approve.length !== 1) {
-      const teacher = docRes.approve[index + 1].teacher;
-      isSuccess = false;
-      email = teacher.email;
-      subject = `ท่านมีคำร้องขอ ${docRes.type.type_name} ที่รอการตอบรับ`;
-      template = `/templates/teachmail`;
-    }
-
-    if (new Date() >= docRes.approve[index].expire_date)
-      throw new BadRequestException();
-
-    await queryRunner.startTransaction();
-
     try {
+      const docRes = await this.trasactionRepository
+        .createQueryBuilder('transaction_document')
+        .leftJoinAndSelect('transaction_document.user', 'user')
+        .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+        .leftJoinAndSelect('transaction_document.type', 'type')
+        .leftJoinAndSelect('transaction_document.approve', 'approve')
+        .leftJoinAndSelect('approve.teacher', 'teacher')
+        .where('transaction_document.id = :id AND approve.status = :status', {
+          id,
+          status: 'waiting',
+        })
+        .orderBy('approve.step', 'ASC')
+        .getOne();
+
+      if (!docRes) throw new NotFoundException('Document Not Found.');
+
+      const index = docRes.approve.findIndex((item) => {
+        return item.id === approveId && item.step === docRes.credit;
+      });
+      if (!docRes.approve[index]) throw new ForbiddenException();
+
+      let isSuccess = true;
+      let email = docRes.user.email;
+      let subject = `คำร้องขอ ${docRes.type.type_name} ของนักศึกษาได้รับการตอบร้อบแล้ว`;
+      let template = `/templates/student`;
+      const pdfLink = `http://localhost:3000/api/trasaction/${id}/download-document`;
+      if (docRes.approve.length !== 1) {
+        const teacher = docRes.approve[index + 1].teacher;
+        isSuccess = false;
+        email = teacher.email;
+        subject = `ท่านมีคำร้องขอ ${docRes.type.type_name} ที่รอการตอบรับ`;
+        template = `/templates/teachmail`;
+      }
+
+      if (new Date() >= docRes.approve[index].expire_date)
+        throw new BadRequestException();
+
+      await queryRunner.startTransaction();
+
       // update approve...
       await queryRunner.manager.update(
         Approve,
@@ -433,7 +441,7 @@ export class TrasactionService {
       };
       await this.sendEmail(option);
     } catch (error) {
-      console.log(error);
+      logger.log(error);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -444,65 +452,65 @@ export class TrasactionService {
   }
 
   async downloadDocument(id: string): Promise<Buffer> {
-    const info = await this.trasactionRepository
-      .createQueryBuilder('transaction_document')
-      .leftJoinAndSelect('transaction_document.user', 'user')
-      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-      .leftJoinAndSelect('transaction_document.type', 'type')
-      .leftJoinAndSelect('transaction_document.approve', 'approve')
-      .leftJoinAndSelect('transaction_document.mapping', 'mapping')
-      .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
-      .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
-      .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
-      .leftJoinAndSelect('docuemntRO26.ro26course', 'ro26course')
-      .leftJoinAndSelect('approve.teacher', 'teacher')
-      .where('transaction_document.id = :id ', { id: id })
-      .orderBy('approve.step', 'ASC')
-      .getOne();
-
-    if (!info) throw new NotFoundException('Document Not Found');
-
-    let doc: any;
-    let path: string;
-    switch (info.type.type_name) {
-      case TypeDocument.RO01: {
-        path = '/RO01';
-        doc = info.mapping.documentRO01;
-        break;
-      }
-      case TypeDocument.RO16: {
-        path = '/RO16';
-        doc = info.mapping.documentRO16;
-        break;
-      }
-      case TypeDocument.RO26: {
-        path = '/RO26';
-        doc = {
-          ADDSUBJECT: info.mapping.docuemntRO26.ro26course.filter(
-            (i) => i.type === CourseStatus.ADD_SUBJECT,
-          ),
-          WITHDRAWAL: info.mapping.docuemntRO26.ro26course.filter(
-            (i) => i.type === CourseStatus.ADD_SUBJECT,
-          ),
-          CHANGESECTION: info.mapping.docuemntRO26.ro26course.filter(
-            (i) => i.type === CourseStatus.ADD_SUBJECT,
-          ),
-        };
-        break;
-      }
-    }
-    const infoPdf: IPdfOption = {
-      template: path,
-      student: info.user,
-      data: doc,
-      approves: info.approve,
-    };
-
     try {
+      const info = await this.trasactionRepository
+        .createQueryBuilder('transaction_document')
+        .leftJoinAndSelect('transaction_document.user', 'user')
+        .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+        .leftJoinAndSelect('transaction_document.type', 'type')
+        .leftJoinAndSelect('transaction_document.approve', 'approve')
+        .leftJoinAndSelect('transaction_document.mapping', 'mapping')
+        .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
+        .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
+        .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
+        .leftJoinAndSelect('docuemntRO26.ro26course', 'ro26course')
+        .leftJoinAndSelect('approve.teacher', 'teacher')
+        .where('transaction_document.id = :id ', { id: id })
+        .orderBy('approve.step', 'ASC')
+        .getOne();
+
+      if (!info) throw new NotFoundException('Document Not Found');
+
+      let doc: any;
+      let path: string;
+      switch (info.type.type_name) {
+        case TypeDocument.RO01: {
+          path = '/RO01';
+          doc = info.mapping.documentRO01;
+          break;
+        }
+        case TypeDocument.RO16: {
+          path = '/RO16';
+          doc = info.mapping.documentRO16;
+          break;
+        }
+        case TypeDocument.RO26: {
+          path = '/RO26';
+          doc = {
+            ADDSUBJECT: info.mapping.docuemntRO26.ro26course.filter(
+              (i) => i.type === CourseStatus.ADD_SUBJECT,
+            ),
+            WITHDRAWAL: info.mapping.docuemntRO26.ro26course.filter(
+              (i) => i.type === CourseStatus.ADD_SUBJECT,
+            ),
+            CHANGESECTION: info.mapping.docuemntRO26.ro26course.filter(
+              (i) => i.type === CourseStatus.ADD_SUBJECT,
+            ),
+          };
+          break;
+        }
+      }
+      const infoPdf: IPdfOption = {
+        template: path,
+        student: info.user,
+        data: doc,
+        approves: info.approve,
+      };
+
       const buffer = await this.generatePDF(infoPdf);
       return buffer;
     } catch (error) {
-      console.log(error);
+      logger.log(error);
       throw new InternalServerErrorException();
     }
   }
