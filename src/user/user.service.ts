@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import logger from 'src/config/logger.config';
 import { UserRepository } from './user.repository';
 
 @Injectable()
@@ -8,7 +9,7 @@ export class UserService {
     @InjectRepository(UserRepository) private userRepository: UserRepository,
   ) {}
 
-  async getStudentProfile(id: string) {
+  async getStudentProfile(id: string): Promise<any> {
     const data = await this.userRepository
       .createQueryBuilder('user')
       .where(`user.id = :id`, { id: id })
@@ -16,6 +17,10 @@ export class UserService {
       .leftJoinAndSelect('user.advisee', 'advisee')
       .leftJoinAndSelect('advisee.advicer', 'advicer')
       .getOne();
+    if (!data) {
+      logger.error(`User not found`);
+      throw new NotFoundException();
+    }
 
     return { status: true, data };
   }

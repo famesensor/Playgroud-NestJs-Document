@@ -18,8 +18,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    console.log(exception.getResponse().valueOf());
-
     let message = '';
     switch (status) {
       case 400:
