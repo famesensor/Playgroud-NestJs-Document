@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import logger from 'src/config/logger.config';
 import { Role } from 'src/shared/enums/role.enum';
 import { UserRepository } from 'src/user/user.repository';
 import { StudentDto } from './dto/create-student.dto';
@@ -23,6 +24,7 @@ export class AuthenticationService {
       signInCredentialsDto,
     );
     if (!user) {
+      logger.error('Invalid credentials!');
       throw new UnauthorizedException('Invalid credentials!');
     }
 
