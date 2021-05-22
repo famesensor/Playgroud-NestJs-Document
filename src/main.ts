@@ -9,10 +9,12 @@ import { HttpExceptionFilter } from './commom/filters/exceptions.filter';
 import { ValidationPipe } from '@nestjs/common';
 import * as morgan from 'morgan';
 import * as moment from 'moment';
+import logger from './config/logger.config';
 
 async function bootstrap() {
   const port = process.env.PORT;
   const app = await NestFactory.create(AppModule, { cors: true });
+
   app.setGlobalPrefix('api');
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
@@ -24,7 +26,13 @@ async function bootstrap() {
     'myformat',
     '[:date[Asia/Taipei]] ":method :url" :status :res[content-length] - :req[user-agent] :response-time ms',
   );
-  app.use(morgan('myformat'));
+  app.use(
+    morgan('combined', {
+      stream: {
+        write: (message) => logger.http(message),
+      },
+    }),
+  );
   await app.listen(port);
 }
 bootstrap();
