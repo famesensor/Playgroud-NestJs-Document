@@ -7,14 +7,24 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './commom/filters/exceptions.filter';
 import { ValidationPipe } from '@nestjs/common';
+import * as morgan from 'morgan';
+import * as moment from 'moment';
 
 async function bootstrap() {
   const port = process.env.PORT;
   const app = await NestFactory.create(AppModule, { cors: true });
-
   app.setGlobalPrefix('api');
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
+
+  morgan.token('date', (req, res, tz) => {
+    return moment().format();
+  });
+  morgan.format(
+    'myformat',
+    '[:date[Asia/Taipei]] ":method :url" :status :res[content-length] - :req[user-agent] :response-time ms',
+  );
+  app.use(morgan('myformat'));
   await app.listen(port);
 }
 bootstrap();
