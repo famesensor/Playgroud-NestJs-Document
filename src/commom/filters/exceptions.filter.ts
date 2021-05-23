@@ -6,6 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import logger from 'src/config/logger.config';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -25,6 +26,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         break;
       case 401:
         message = exception.message;
+        logger.error(message);
         break;
       case 403:
         message = exception.message;

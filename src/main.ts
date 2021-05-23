@@ -29,7 +29,7 @@ async function bootstrap() {
   app.use(
     morgan('combined', {
       stream: {
-        write: (message) => logger.http(message),
+        write: (message) => logger.warn(message),
       },
     }),
   );
