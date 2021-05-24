@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/shared/decorators/get-user.decorator';
 import { Role } from 'src/shared/enums/role.enum';
@@ -17,5 +17,11 @@ export class UserController {
   @UseGuards(AuthGuard(), RolesGuard)
   getUser(@GetUser() user: User): Promise<any> {
     return this.userService.getStudentProfile(user.id);
+  }
+
+  @Get('/:id')
+  @UseGuards(AuthGuard())
+  getStudentInfo(@Param('id') id: string): Promise<any> {
+    return this.userService.getStudentProfile(id);
   }
 }
