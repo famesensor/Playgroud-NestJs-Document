@@ -28,4 +28,8 @@ export class RO16Dto {
   @IsNotEmpty()
   @IsDateString()
   end_date: string;
+
+  @IsNotEmpty()
+  @IsString()
+  reason: string;
 }

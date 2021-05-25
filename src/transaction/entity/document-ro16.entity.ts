@@ -25,6 +25,9 @@ export class DocumentRO16 extends BaseEntity {
   @Column()
   wish: string;
 
+  @Column()
+  reason: string;
+
   @Column({ type: 'float8' })
   time_period: number;
 
