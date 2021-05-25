@@ -135,7 +135,7 @@ export class TrasactionService {
       };
       await this.sendEmail(option);
     } catch (error) {
-      logger.log(error);
+      logger.error(error);
       throw new InternalServerErrorException();
     }
 
@@ -179,7 +179,7 @@ export class TrasactionService {
       };
       await this.sendEmail(option);
     } catch (error) {
-      logger.log(error);
+      logger.error(error);
       throw new InternalServerErrorException();
     }
     return { status: true, message: 'success' };
@@ -348,13 +348,13 @@ export class TrasactionService {
           name: docRes.user.name,
           student_id: docRes.user.studentInfo.student_code,
           type_name: docRes.type.type_name,
-          validate_url: `http://localhost:3000/api/trasaction/${id}/approve/${docRes.approve[0].id}`,
+          validate_url: `${process.env.URL_SERVER}${id}/approve/${docRes.approve[0].id}`,
         },
       };
 
       await this.sendEmail(option);
     } catch (error) {
-      logger.log(error);
+      logger.error(error);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -394,7 +394,7 @@ export class TrasactionService {
       let email = docRes.user.email;
       let subject = `คำร้องขอ ${docRes.type.type_name} ของนักศึกษาได้รับการตอบร้อบแล้ว`;
       let template = `/templates/student`;
-      const pdfLink = `http://localhost:3000/api/trasaction/${id}/download-document`;
+      const pdfLink = `${process.env.URL_SERVER}${id}/download-document`;
       if (docRes.approve.length !== 1) {
         const teacher = docRes.approve[index + 1].teacher;
         isSuccess = false;
@@ -441,7 +441,7 @@ export class TrasactionService {
       };
       await this.sendEmail(option);
     } catch (error) {
-      logger.log(error);
+      logger.error(error);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -510,7 +510,7 @@ export class TrasactionService {
       const buffer = await this.generatePDF(infoPdf);
       return buffer;
     } catch (error) {
-      logger.log(error);
+      logger.error(error);
       throw new InternalServerErrorException();
     }
   }
@@ -544,7 +544,7 @@ export class TrasactionService {
         },
       });
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       throw new InternalServerErrorException();
     }
   }
