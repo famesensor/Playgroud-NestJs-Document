@@ -1,4 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
+import logger from 'src/config/logger.config';
 import { User } from 'src/user/entity/user.entity';
 import { UUIDGen } from 'src/utils/uuid';
 import { EntityRepository, getConnection, Repository } from 'typeorm';
@@ -87,14 +88,14 @@ export class RO16Repository extends Repository<DocumentRO16> {
 
     trasaction.mapping = map;
     trasaction.approve = approvies;
-
+    await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       await queryRunner.manager.save(trasaction);
       await queryRunner.commitTransaction();
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {

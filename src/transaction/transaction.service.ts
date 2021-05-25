@@ -254,29 +254,25 @@ export class TrasactionService {
 
   // get document...
   async getDocument(id: string): Promise<any> {
-    try {
-      const doc = await this.trasactionRepository
-        .createQueryBuilder('transaction_document')
-        .leftJoinAndSelect('transaction_document.user', 'user')
-        .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-        .leftJoinAndSelect('transaction_document.type', 'type')
-        .leftJoinAndSelect('transaction_document.mapping', 'mapping')
-        .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
-        .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
-        .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
-        .where('transaction_document.id = :id', {
-          id: id,
-        })
-        .getOne();
-      if (!doc) {
-        throw new NotFoundException('Document Not Found');
-      }
-
-      return { status: true, data: doc };
-    } catch (error) {
-      logger.error(error);
-      throw new InternalServerErrorException();
+    const doc = await this.trasactionRepository
+      .createQueryBuilder('transaction_document')
+      .leftJoinAndSelect('transaction_document.user', 'user')
+      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('transaction_document.type', 'type')
+      .leftJoinAndSelect('transaction_document.mapping', 'mapping')
+      .leftJoinAndSelect('mapping.documentRO01', 'documentRO01')
+      .leftJoinAndSelect('mapping.documentRO16', 'documentRO16')
+      .leftJoinAndSelect('mapping.docuemntRO26', 'docuemntRO26')
+      .where('transaction_document.id = :id', {
+        id: id,
+      })
+      .getOne();
+    if (!doc) {
+      logger.error('Document Not Found');
+      throw new NotFoundException('Document Not Found');
     }
+
+    return { status: true, data: doc };
   }
 
   // approve and comment docuement...
@@ -288,35 +284,36 @@ export class TrasactionService {
     const { comment } = commentDto;
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
+    await queryRunner.connect();
+    const docRes = await this.trasactionRepository
+      .createQueryBuilder('transaction_document')
+      .leftJoinAndSelect('transaction_document.user', 'user')
+      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('transaction_document.type', 'type')
+      .leftJoinAndSelect('transaction_document.approve', 'approve')
+      .where('transaction_document.id = :id', { id })
+      .andWhere(
+        'approve.teacherId = :teacher_id AND approve.status = :status',
+        {
+          teacher_id: userId,
+          status: 'waiting',
+        },
+      )
+      .getOne();
+
+    if (!docRes) throw new NotFoundException(`Document Not Found.`);
+
+    if (docRes.success) throw new BadRequestException();
+
+    if (docRes.credit !== docRes.approve[0].step)
+      throw new ForbiddenException();
+
+    const teacher = await this.userRepository.getUserDetail(userId);
+    if (!teacher) throw new NotFoundException(`Teacher Not Found.`);
+
+    await queryRunner.startTransaction();
+
     try {
-      const docRes = await this.trasactionRepository
-        .createQueryBuilder('transaction_document')
-        .leftJoinAndSelect('transaction_document.user', 'user')
-        .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-        .leftJoinAndSelect('transaction_document.type', 'type')
-        .leftJoinAndSelect('transaction_document.approve', 'approve')
-        .where('transaction_document.id = :id', { id })
-        .andWhere(
-          'approve.teacherId = :teacher_id AND approve.status = :status',
-          {
-            teacher_id: userId,
-            status: 'waiting',
-          },
-        )
-        .getOne();
-
-      if (!docRes) throw new NotFoundException(`Document Not Found.`);
-
-      if (docRes.success) throw new BadRequestException();
-
-      if (docRes.credit !== docRes.approve[0].step)
-        throw new ForbiddenException();
-
-      const teacher = await this.userRepository.getUserDetail(userId);
-      if (!teacher) throw new NotFoundException(`Teacher Not Found.`);
-
-      await queryRunner.startTransaction();
-
       // update approve...
       await queryRunner.manager.update(
         Approve,
@@ -327,7 +324,6 @@ export class TrasactionService {
           update_date: new Date(),
         },
       );
-
       // update trasaction...
       await queryRunner.manager.update(
         TransactionDocument,
@@ -336,9 +332,6 @@ export class TrasactionService {
           update_date: new Date(),
         },
       );
-
-      await queryRunner.commitTransaction();
-
       // send email to teacher
       const option: IEmailOption = {
         to: teacher.email,
@@ -353,8 +346,9 @@ export class TrasactionService {
       };
 
       await this.sendEmail(option);
+      await queryRunner.commitTransaction();
     } catch (error) {
-      logger.error(error);
+      logger.error(`1`, error);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -368,46 +362,46 @@ export class TrasactionService {
   async confirmApprove(id: string, approveId: string): Promise<any> {
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
+    await queryRunner.connect();
+
+    const docRes = await this.trasactionRepository
+      .createQueryBuilder('transaction_document')
+      .leftJoinAndSelect('transaction_document.user', 'user')
+      .leftJoinAndSelect('user.studentInfo', 'studentInfo')
+      .leftJoinAndSelect('transaction_document.type', 'type')
+      .leftJoinAndSelect('transaction_document.approve', 'approve')
+      .leftJoinAndSelect('approve.teacher', 'teacher')
+      .where('transaction_document.id = :id AND approve.status = :status', {
+        id,
+        status: 'waiting',
+      })
+      .orderBy('approve.step', 'ASC')
+      .getOne();
+
+    if (!docRes) throw new NotFoundException('Document Not Found.');
+
+    const index = docRes.approve.findIndex((item) => {
+      return item.id === approveId && item.step === docRes.credit;
+    });
+    if (!docRes.approve[index]) throw new ForbiddenException();
+
+    let isSuccess = true;
+    let email = docRes.user.email;
+    let subject = `คำร้องขอ ${docRes.type.type_name} ของนักศึกษาได้รับการตอบร้อบแล้ว`;
+    let template = `/templates/student`;
+    const pdfLink = `${process.env.URL_SERVER}${id}/download-document`;
+    if (docRes.approve.length !== 1) {
+      const teacher = docRes.approve[index + 1].teacher;
+      isSuccess = false;
+      email = teacher.email;
+      subject = `ท่านมีคำร้องขอ ${docRes.type.type_name} ที่รอการตอบรับ`;
+      template = `/templates/teachmail`;
+    }
+
+    if (new Date() >= docRes.approve[index].expire_date)
+      throw new BadRequestException();
+    await queryRunner.startTransaction();
     try {
-      const docRes = await this.trasactionRepository
-        .createQueryBuilder('transaction_document')
-        .leftJoinAndSelect('transaction_document.user', 'user')
-        .leftJoinAndSelect('user.studentInfo', 'studentInfo')
-        .leftJoinAndSelect('transaction_document.type', 'type')
-        .leftJoinAndSelect('transaction_document.approve', 'approve')
-        .leftJoinAndSelect('approve.teacher', 'teacher')
-        .where('transaction_document.id = :id AND approve.status = :status', {
-          id,
-          status: 'waiting',
-        })
-        .orderBy('approve.step', 'ASC')
-        .getOne();
-
-      if (!docRes) throw new NotFoundException('Document Not Found.');
-
-      const index = docRes.approve.findIndex((item) => {
-        return item.id === approveId && item.step === docRes.credit;
-      });
-      if (!docRes.approve[index]) throw new ForbiddenException();
-
-      let isSuccess = true;
-      let email = docRes.user.email;
-      let subject = `คำร้องขอ ${docRes.type.type_name} ของนักศึกษาได้รับการตอบร้อบแล้ว`;
-      let template = `/templates/student`;
-      const pdfLink = `${process.env.URL_SERVER}${id}/download-document`;
-      if (docRes.approve.length !== 1) {
-        const teacher = docRes.approve[index + 1].teacher;
-        isSuccess = false;
-        email = teacher.email;
-        subject = `ท่านมีคำร้องขอ ${docRes.type.type_name} ที่รอการตอบรับ`;
-        template = `/templates/teachmail`;
-      }
-
-      if (new Date() >= docRes.approve[index].expire_date)
-        throw new BadRequestException();
-
-      await queryRunner.startTransaction();
-
       // update approve...
       await queryRunner.manager.update(
         Approve,
@@ -425,7 +419,6 @@ export class TrasactionService {
           update_date: new Date(),
         },
       );
-      await queryRunner.commitTransaction();
 
       // send email to teacher
       const option: IEmailOption = {
@@ -440,6 +433,7 @@ export class TrasactionService {
         },
       };
       await this.sendEmail(option);
+      await queryRunner.commitTransaction();
     } catch (error) {
       logger.error(error);
       await queryRunner.rollbackTransaction();
@@ -447,7 +441,7 @@ export class TrasactionService {
     } finally {
       await queryRunner.release();
     }
-    // return;
+
     return { status: true, message: 'success' };
   }
 

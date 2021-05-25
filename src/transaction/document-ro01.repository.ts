@@ -17,6 +17,7 @@ import {
 import { DocumentType } from './entity/document-type.entity';
 import { Approve, PREFIX_APPROVE } from './entity/approve.entity';
 import { InternalServerErrorException } from '@nestjs/common';
+import logger from 'src/config/logger.config';
 
 @EntityRepository(DocumentRO01)
 export class RO01Repository extends Repository<DocumentRO01> {
@@ -78,14 +79,14 @@ export class RO01Repository extends Repository<DocumentRO01> {
 
     trasaction.mapping = map;
     trasaction.approve = approvies;
-
+    await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       await queryRunner.manager.save(trasaction);
       await queryRunner.commitTransaction();
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
