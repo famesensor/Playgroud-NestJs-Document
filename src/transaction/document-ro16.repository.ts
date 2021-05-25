@@ -31,6 +31,7 @@ export class RO16Repository extends Repository<DocumentRO16> {
       time_period,
       start_date,
       end_date,
+      reason,
     } = ro16Dto;
     const connection = getConnection();
     const queryRunner = connection.createQueryRunner();
@@ -43,6 +44,7 @@ export class RO16Repository extends Repository<DocumentRO16> {
     roDoc.to_name = to_name;
     roDoc.wish = wish;
     roDoc.time_period = time_period;
+    roDoc.reason = reason;
     roDoc.startDate = new Date(start_date);
     roDoc.endDate = new Date(end_date);
     roDoc.createBy = user.id;
