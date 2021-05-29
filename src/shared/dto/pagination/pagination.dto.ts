@@ -28,6 +28,6 @@ export class PaginationDto {
 export interface PaginationRes {
   status: boolean;
   page: number;
-  total: number;
+  total_page: number;
   data: any[];
 }
