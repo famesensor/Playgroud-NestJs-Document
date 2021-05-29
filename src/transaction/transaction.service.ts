@@ -244,7 +244,7 @@ export class TrasactionService {
         status: true,
         data: res,
         page: page,
-        total: resCount < limit ? 1 : Math.floor(resCount / limit),
+        total_page: resCount < limit ? 1 : Math.ceil(resCount / limit),
       };
     } catch (error) {
       logger.error(error);
