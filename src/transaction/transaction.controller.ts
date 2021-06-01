@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Redirect,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -82,11 +83,12 @@ export class TrasactionController {
 
   @Roles(Role.Teacher)
   @Get('/:id/approve/:approve_id')
-  confirmApprove(
+  async confirmApprove(
     @Param('id') id: string,
     @Param('approve_id') approveId: string,
   ) {
-    return this.trasactionService.confirmApprove(id, approveId);
+    await this.trasactionService.confirmApprove(id, approveId);
+    return Redirect('https://documentor-kmutt.herokuapp.com/');
   }
 
   @Get('/:id/download-document')
